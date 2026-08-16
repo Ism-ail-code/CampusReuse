@@ -15,17 +15,20 @@ create extension if not exists pgcrypto;
 -- ----------------------------------------------------------------------------
 
 -- True if the given uid belongs to an admin profile.
+-- plpgsql so creating it does not require profiles to exist yet.
 create or replace function public.is_admin(uid uuid)
 returns boolean
-language sql
+language plpgsql
 stable
 security definer
 set search_path = public
 as $$
-  select exists (
+begin
+  return exists (
     select 1 from public.profiles
     where id = uid and role = 'admin'
   );
+end;
 $$;
 
 -- ----------------------------------------------------------------------------
@@ -112,39 +115,6 @@ create policy "Admins manage institutions"
   with check (public.is_admin(auth.uid()));
 
 -- ----------------------------------------------------------------------------
--- Institution requests (users propose new institutions; admins approve)
--- ----------------------------------------------------------------------------
-create table public.institution_requests (
-  id           uuid primary key default gen_random_uuid(),
-  user_id      uuid not null references public.profiles(id) on delete cascade,
-  name         text not null,
-  type         public.institution_type not null default 'other',
-  city         text not null default '',
-  status       text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'duplicate')),
-  admin_note   text,
-  created_at   timestamptz not null default now(),
-  reviewed_at  timestamptz
-);
-
-alter table public.institution_requests enable row level security;
-
-create policy "User creates own institution requests"
-  on public.institution_requests for insert
-  with check (auth.uid() = user_id);
-
-create policy "User reads own institution requests"
-  on public.institution_requests for select
-  using (auth.uid() = user_id);
-
-create policy "Admins manage institution requests"
-  on public.institution_requests for update
-  using (public.is_admin(auth.uid()));
-
-create policy "Admins read institution requests"
-  on public.institution_requests for select
-  using (public.is_admin(auth.uid()));
-
--- ----------------------------------------------------------------------------
 -- Profiles (public data)
 -- ----------------------------------------------------------------------------
 create table public.profiles (
@@ -186,6 +156,40 @@ create policy "Admins manage profiles"
   on public.profiles for all
   using (public.is_admin(auth.uid()))
   with check (public.is_admin(auth.uid()));
+
+-- ----------------------------------------------------------------------------
+-- Institution requests (users propose new institutions; admins approve)
+-- Placed after profiles because it references profiles(id).
+-- ----------------------------------------------------------------------------
+create table public.institution_requests (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references public.profiles(id) on delete cascade,
+  name         text not null,
+  type         public.institution_type not null default 'other',
+  city         text not null default '',
+  status       text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'duplicate')),
+  admin_note   text,
+  created_at   timestamptz not null default now(),
+  reviewed_at  timestamptz
+);
+
+alter table public.institution_requests enable row level security;
+
+create policy "User creates own institution requests"
+  on public.institution_requests for insert
+  with check (auth.uid() = user_id);
+
+create policy "User reads own institution requests"
+  on public.institution_requests for select
+  using (auth.uid() = user_id);
+
+create policy "Admins manage institution requests"
+  on public.institution_requests for update
+  using (public.is_admin(auth.uid()));
+
+create policy "Admins read institution requests"
+  on public.institution_requests for select
+  using (public.is_admin(auth.uid()));
 
 -- ----------------------------------------------------------------------------
 -- Private user details (never exposed publicly)
