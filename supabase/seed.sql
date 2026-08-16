@@ -25,7 +25,7 @@ insert into public.institutions (id, name, type, city, is_verified) values
   ('11111111-1111-1111-1111-111111111104', 'Lahore Grammar School',                        'school',     'Lahore', true),
   ('11111111-1111-1111-1111-111111111105', 'KIPS College',                                 'college',    'Lahore', true),
   ('11111111-1111-1111-1111-111111111106', 'Beaconhouse School System',                    'school',     'Lahore', true)
-on conflict (id) do nothing;
+on conflict do nothing;
 
 insert into public.institutions (id, name, type, city, is_verified)
 select
@@ -120,7 +120,7 @@ from (values
   ('Islamabad Convent School',                              'school',     'Islamabad',  true),
   ('Kendall Pearson Academy',                               'school',     'Lahore',     true)
 ) as t(name, type, city, is_verified)
-on conflict (lower(name)) do nothing;
+on conflict do nothing;
 
 -- ----------------------------------------------------------------------------
 -- Demo users (auth users so login works, profiles via trigger)
@@ -172,7 +172,7 @@ from (values
      'account_type', 'teacher', 'education_level', 'Teaching Staff',
      'institution_id', '11111111-1111-1111-1111-111111111104'))
 ) as u(email, password, meta)
-on conflict (email) do nothing;
+on conflict do nothing;
 
 -- Promote admin user
 select public.make_admin('admin@campusreuse.app');
@@ -270,7 +270,7 @@ insert into public.listings (
    3, 'Computer Science', 'Grade 9', 'good',
    'In good condition, no missing pages.',
    'sell', 350, null, 'available', now() + interval '24 days')
-on conflict (id) do nothing;
+on conflict do nothing;
 
 -- ----------------------------------------------------------------------------
 -- Demo listing images (placeholder URLs — replace with real photos)
@@ -325,4 +325,4 @@ insert into public.wanted_posts (
    'good', 2500,
    'Casio or similar. Need it before the November exam session.',
    'active', now() + interval '10 days')
-on conflict (id) do nothing;
+on conflict do nothing;
