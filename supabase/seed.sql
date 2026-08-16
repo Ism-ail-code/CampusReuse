@@ -125,9 +125,14 @@ on conflict do nothing;
 -- Demo user (auth user so login works; profile is created by the
 -- handle_new_user trigger). Also the admin account so every page is testable.
 -- ----------------------------------------------------------------------------
+-- GoTrue scans token columns into strings; NULLs break login with
+-- "Database error querying schema". Provide empty strings + is_super_admin.
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
   email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  confirmation_token, recovery_token, email_change_token_new, email_change,
+  phone_change, phone_change_token, email_change_token_current,
+  reauthentication_token, is_super_admin,
   created_at, updated_at
 )
 select
@@ -140,6 +145,9 @@ select
   now(),
   jsonb_build_object('provider', 'email', 'providers', array['email']),
   u.meta,
+  '', '', '', '',
+  '', '', '',
+  '', false,
   now(),
   now()
 from (values
