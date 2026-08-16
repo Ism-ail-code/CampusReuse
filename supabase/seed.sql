@@ -5,8 +5,7 @@
 -- after connecting a Supabase project. It is NOT part of the real product.
 -- Delete it (or don't run it) for production.
 --
--- Demo login: demo@campusreuse.app  /  DemoPass123!
--- Admin login: admin@campusreuse.app / AdminPass123!
+-- Demo login: demo@campusreuse.app / DemoPass123! (also the admin account)
 --
 -- NOTE: listing images below use external placeholder URLs (picsum.photos).
 -- Replace with real photos when you actually list items.
@@ -123,7 +122,8 @@ from (values
 on conflict do nothing;
 
 -- ----------------------------------------------------------------------------
--- Demo users (auth users so login works, profiles via trigger)
+-- Demo user (auth user so login works; profile is created by the
+-- handle_new_user trigger). Also the admin account so every page is testable.
 -- ----------------------------------------------------------------------------
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -146,36 +146,12 @@ from (values
   ('demo@campusreuse.app', 'DemoPass123!', jsonb_build_object(
      'display_name', 'Ayesha Khan', 'username', 'ayesha_khan',
      'account_type', 'student', 'education_level', 'BS Computer Science Year 2',
-     'institution_id', '11111111-1111-1111-1111-111111111101')),
-  ('admin@campusreuse.app', 'AdminPass123!', jsonb_build_object(
-     'display_name', 'Admin User', 'username', 'campus_admin',
-     'account_type', 'student', 'education_level', 'Masters',
-     'institution_id', '11111111-1111-1111-1111-111111111101')),
-  ('bilal@campusreuse.app', 'DemoPass123!', jsonb_build_object(
-     'display_name', 'Bilal Ahmed', 'username', 'bilal_ahmed',
-     'account_type', 'student', 'education_level', 'Grade 11',
-     'institution_id', '11111111-1111-1111-1111-111111111104')),
-  ('fatima@campusreuse.app', 'DemoPass123!', jsonb_build_object(
-     'display_name', 'Fatima Noor', 'username', 'fatima_noor',
-     'account_type', 'student', 'education_level', 'Grade 12',
-     'institution_id', '11111111-1111-1111-1111-111111111104')),
-  ('daniyal@campusreuse.app', 'DemoPass123!', jsonb_build_object(
-     'display_name', 'Daniyal Shah', 'username', 'daniyal_shah',
-     'account_type', 'student', 'education_level', 'BS Physics Year 3',
-     'institution_id', '11111111-1111-1111-1111-111111111103')),
-  ('zara@campusreuse.app', 'DemoPass123!', jsonb_build_object(
-     'display_name', 'Zara Malik', 'username', 'zara_malik',
-     'account_type', 'student', 'education_level', 'Grade 10',
-     'institution_id', '11111111-1111-1111-1111-111111111106')),
-  ('mr_shah@campusreuse.app', 'DemoPass123!', jsonb_build_object(
-     'display_name', 'Mr. Imran Shah', 'username', 'mr_shah',
-     'account_type', 'teacher', 'education_level', 'Teaching Staff',
-     'institution_id', '11111111-1111-1111-1111-111111111104'))
+     'institution_id', '11111111-1111-1111-1111-111111111101'))
 ) as u(email, password, meta)
 on conflict do nothing;
 
--- Promote admin user
-select public.make_admin('admin@campusreuse.app');
+-- Promote demo user to admin
+select public.make_admin('demo@campusreuse.app');
 
 -- ----------------------------------------------------------------------------
 -- Demo listings
@@ -199,77 +175,12 @@ insert into public.listings (
    'exchange', null, 'Class 11 Mathematics textbook (any board)',
    'available', now() + interval '12 days'),
 
-  ('22222222-2222-2222-2222-222222222203',
-   (select id from public.profiles where username = 'bilal_ahmed'),
-   'Class 10 Maths Key Book / Solved Guide (LGS edition)',
-   3, 'Mathematics', 'Grade 10', 'good',
-   'Step-by-step solutions. A few pages have margin notes. Very helpful for boards preparation.',
-   'sell', 450, null, 'available', now() + interval '25 days'),
-
-  ('22222222-2222-2222-2222-222222222204',
-   (select id from public.profiles where username = 'fatima_noor'),
-   'Class 9 Biology Complete Notes (handwritten, 120 pages)',
-   2, 'Biology', 'Grade 9', 'used',
-   'Complete handwritten notes covering all chapters with diagrams. Gave them away to a junior.',
-   'give_away', null, null, 'given_away', now() - interval '5 days'),
-
-  ('22222222-2222-2222-2222-222222222205',
-   (select id from public.profiles where username = 'daniyal_shah'),
-   'Casio fx-991EX ClassWiz Scientific Calculator',
-   4, null, 'BS Physics Year 3', 'like_new',
-   'Used for one semester of labs. Comes with original box and manual. Perfect for engineering/physics.',
-   'sell', 5000, null, 'available', now() + interval '18 days'),
-
-  ('22222222-2222-2222-2222-222222222206',
-   (select id from public.profiles where username = 'zara_malik'),
-   'English Literature Guide — Class 10',
-   3, 'English', 'Grade 10', 'good',
-   'Punjab board. Some highlighting in poetry section. Free to whoever needs it.',
-   'give_away', null, null, 'available', now() + interval '28 days'),
-
-  ('22222222-2222-2222-2222-222222222207',
-   (select id from public.profiles where username = 'mr_shah'),
-   'Oxford English Grammar Course (Advanced) — unused',
-   1, 'English', 'Teacher resource', 'new',
-   'Brand new, never opened. Great for teaching O/A level English.',
-   'sell', 2200, null, 'available', now() + interval '22 days'),
-
-  ('22222222-2222-2222-2222-222222222208',
-   (select id from public.profiles where username = 'daniyal_shah'),
-   'Calculus Early Transcendentals — swap for Linear Algebra book',
-   1, 'Mathematics', 'BS Year 1', 'used',
-   'Well used but complete. Looking to swap for a Linear Algebra text (any edition).',
-   'exchange', null, 'Linear Algebra textbook',
-   'available', now() + interval '30 days'),
-
-  ('22222222-2222-2222-2222-222222222209',
-   (select id from public.profiles where username = 'bilal_ahmed'),
-   'Pack of 5 A4 Notebooks (unused)',
-   5, null, 'Grade 11', 'new',
-   'Unused notebooks from a bulk pack. Selling cheap.',
-   'sell', 500, null, 'reserved', now() + interval '9 days'),
-
   ('22222222-2222-2222-2222-222222222210',
    (select id from public.profiles where username = 'ayesha_khan'),
    'Data Structures & Algorithms in Java (2nd ed)',
    1, 'Computer Science', 'BS CS Year 2', 'good',
    'Core course book. Slight cover wear, inside clean.',
-   'sell', 1500, null, 'expired', now() - interval '2 days'),
-
-  ('22222222-2222-2222-2222-222222222211',
-   (select id from public.profiles where username = 'fatima_noor'),
-   'Physics Practical Notebook (Class 9)',
-   5, 'Physics', 'Grade 9', 'like_new',
-   'Completed practical notebook, teacher-checked. Useful as a reference.',
-   'exchange', null, 'Chemistry practical notebook',
-   'available', now() + interval '15 days'),
-
-  ('22222222-2222-2222-2222-222222222212',
-   (select id from public.profiles where username = 'zara_malik'),
-   'Computer Science Class 9 Guide',
-   3, 'Computer Science', 'Grade 9', 'good',
-   'In good condition, no missing pages.',
-   'sell', 350, null, 'available', now() + interval '24 days')
+   'sell', 1500, null, 'expired', now() - interval '2 days')
 on conflict do nothing;
 
 -- ----------------------------------------------------------------------------
@@ -281,48 +192,11 @@ from public.listings l
 where l.id in (
   '22222222-2222-2222-2222-222222222201',
   '22222222-2222-2222-2222-222222222202',
-  '22222222-2222-2222-2222-222222222203',
-  '22222222-2222-2222-2222-222222222205',
-  '22222222-2222-2222-2222-222222222206',
-  '22222222-2222-2222-2222-222222222207',
-  '22222222-2222-2222-2222-222222222208',
-  '22222222-2222-2222-2222-222222222209',
-  '22222222-2222-2222-2222-222222222211',
-  '22222222-2222-2222-2222-222222222212'
-);
+  '22222222-2222-2222-2222-222222222210'
+)
+  and not exists (select 1 from public.listing_images img where img.listing_id = l.id);
 
 -- ----------------------------------------------------------------------------
--- Demo wanted posts
+-- (Demo wanted posts removed — the single demo account has no wishlist items.
+-- Create them from the app to test that flow.)
 -- ----------------------------------------------------------------------------
-insert into public.wanted_posts (
-  id, user_id, title, category_id, subject, education_level,
-  condition_pref, budget, description, status, expires_at
-) values
-  ('33333333-3333-3333-3333-333333333301',
-   (select id from public.profiles where username = 'bilal_ahmed'),
-   'Wanted: Class 11 Physics Textbook', 1, 'Physics', 'Grade 11',
-   'good', 1000,
-   'Looking for a used copy in reasonable condition. Any board welcome.',
-   'active', now() + interval '20 days'),
-
-  ('33333333-3333-3333-3333-333333333302',
-   (select id from public.profiles where username = 'zara_malik'),
-   'Wanted: Class 10 Biology textbook', 1, 'Biology', 'Grade 10',
-   'used', 600,
-   'Need it for board prep. Willing to buy used.',
-   'active', now() + interval '26 days'),
-
-  ('33333333-3333-3333-3333-333333333303',
-   (select id from public.profiles where username = 'daniyal_shah'),
-   'Wanted: Linear Algebra textbook', 1, 'Mathematics', 'BS Year 2',
-   null, 1500,
-   'Any standard text. Happy to exchange or buy.',
-   'active', now() + interval '14 days'),
-
-  ('33333333-3333-3333-3333-333333333304',
-   (select id from public.profiles where username = 'ayesha_khan'),
-   'Wanted: Scientific calculator for exams', 4, null, 'Grade 12',
-   'good', 2500,
-   'Casio or similar. Need it before the November exam session.',
-   'active', now() + interval '10 days')
-on conflict do nothing;
