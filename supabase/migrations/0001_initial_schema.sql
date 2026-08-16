@@ -459,24 +459,6 @@ create index conversations_last_message_idx on public.conversations(last_message
 
 alter table public.conversations enable row level security;
 
-create policy "Participants read conversation"
-  on public.conversations for select
-  using (exists (
-    select 1 from public.conversation_participants cp
-    where cp.conversation_id = id and cp.user_id = auth.uid()
-  ));
-
-create policy "Participants update conversation"
-  on public.conversations for update
-  using (exists (
-    select 1 from public.conversation_participants cp
-    where cp.conversation_id = id and cp.user_id = auth.uid()
-  ))
-  with check (exists (
-    select 1 from public.conversation_participants cp
-    where cp.conversation_id = id and cp.user_id = auth.uid()
-  ));
-
 -- ----------------------------------------------------------------------------
 -- Conversation participants
 -- ----------------------------------------------------------------------------
@@ -500,6 +482,24 @@ create policy "Participants manage membership"
   on public.conversation_participants for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+create policy "Participants read conversation"
+  on public.conversations for select
+  using (exists (
+    select 1 from public.conversation_participants cp
+    where cp.conversation_id = id and cp.user_id = auth.uid()
+  ));
+
+create policy "Participants update conversation"
+  on public.conversations for update
+  using (exists (
+    select 1 from public.conversation_participants cp
+    where cp.conversation_id = id and cp.user_id = auth.uid()
+  ))
+  with check (exists (
+    select 1 from public.conversation_participants cp
+    where cp.conversation_id = id and cp.user_id = auth.uid()
+  ));
 
 -- ----------------------------------------------------------------------------
 -- Messages
