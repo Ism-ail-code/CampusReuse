@@ -168,7 +168,7 @@ from (values
      'account_type', 'student', 'education_level', 'Grade 10',
      'institution_id', '11111111-1111-1111-1111-111111111106')),
   ('mr_shah@campusreuse.app', 'DemoPass123!', jsonb_build_object(
-     'display_name', 'Mr. Imran Shah', 'username', 'imran_shah',
+     'display_name', 'Mr. Imran Shah', 'username', 'mr_shah',
      'account_type', 'teacher', 'education_level', 'Teaching Staff',
      'institution_id', '11111111-1111-1111-1111-111111111104'))
 ) as u(email, password, meta)
