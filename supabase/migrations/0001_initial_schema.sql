@@ -95,9 +95,10 @@ create table public.institutions (
   city        text not null default '',
   is_verified boolean not null default false,
   is_active   boolean not null default true,
-  created_at  timestamptz not null default now(),
-  unique (lower(name))
+  created_at  timestamptz not null default now()
 );
+
+create unique index institutions_name_lower_idx on public.institutions (lower(name));
 
 alter table public.institutions enable row level security;
 
