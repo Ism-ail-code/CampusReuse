@@ -132,7 +132,7 @@ insert into auth.users (
 )
 select
   '00000000-0000-0000-0000-000000000000',
-  u.id,
+  gen_random_uuid(),
   'authenticated',
   'authenticated',
   u.email,
