@@ -22,3 +22,7 @@ where email = 'demo@campusreuse.app';
 select email, confirmation_token, recovery_token, is_super_admin
 from auth.users
 where email = 'demo@campusreuse.app';
+
+-- The old seed promoted admin@campusreuse.app (now deleted). Make the single
+-- demo account the admin so the admin pages stay testable.
+select public.make_admin('demo@campusreuse.app');
