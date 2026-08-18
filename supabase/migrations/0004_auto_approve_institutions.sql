@@ -1,8 +1,8 @@
 -- ============================================================================
 -- 0004: Auto-approve institution requests
 -- Users who can't find their institution get it created immediately (trusting
--- the name they typed), attached to their profile, and recorded as an
--- 'approved' request for admin visibility.
+-- the name they typed), marked verified, attached to their profile, and
+-- recorded as an 'approved' request for admin visibility. No moderation step.
 -- Rollback: drop function public.request_institution(text, text, text);
 -- ============================================================================
 
@@ -41,12 +41,13 @@ begin
 
   if v_inst is null then
     insert into public.institutions (name, type, city, is_verified)
-    values (btrim(p_name), v_type, btrim(coalesce(p_city, '')), false)
+    values (btrim(p_name), v_type, btrim(coalesce(p_city, '')), true)
     returning id into v_inst;
   end if;
 
   update public.profiles
-     set institution_id = v_inst
+     set institution_id = v_inst,
+         institution_verified = true
    where id = v_user;
 
   insert into public.institution_requests (user_id, name, type, city, status, admin_note, reviewed_at)
@@ -61,7 +62,8 @@ exception
      where lower(name) = lower(btrim(p_name))
      limit 1;
     update public.profiles
-       set institution_id = v_inst
+       set institution_id = v_inst,
+           institution_verified = true
      where id = v_user;
     insert into public.institution_requests (user_id, name, type, city, status, admin_note, reviewed_at)
     values (v_user, btrim(p_name), v_type, btrim(coalesce(p_city, '')), 'approved', 'auto-approved', now());

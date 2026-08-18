@@ -89,7 +89,7 @@ export interface DataService {
   // ---- Institutions ----
   listInstitutions(): Promise<Institution[]>
   searchInstitutions(query: string): Promise<Institution[]>
-  requestInstitution(input: InstitutionRequestInput): Promise<{ error?: string }>
+  requestInstitution(input: InstitutionRequestInput): Promise<{ id?: string; pending?: boolean; error?: string }>
   listMyInstitutionRequests(): Promise<{ id: string; name: string; status: string }[]>
 
   // ---- Listings ----

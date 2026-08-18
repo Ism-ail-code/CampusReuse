@@ -106,7 +106,13 @@ class SupabaseService implements DataService {
         },
       },
     })
-    if (error) return { error: mapError(error, "Could not create account.") }
+    if (error) {
+      const msg = String(error.message ?? "")
+      if (msg.toLowerCase().includes("database error saving new user")) {
+        return { error: "We couldn't create your account because of a temporary problem. Please try again." }
+      }
+      return { error: mapError(error, "Could not create account.") }
+    }
     return { needsEmailConfirmation: !result.session }
   }
 
@@ -235,12 +241,13 @@ class SupabaseService implements DataService {
       .slice(0, 20)
   }
 
-  async requestInstitution(input: InstitutionRequestInput): Promise<{ error?: string }> {
+  async requestInstitution(input: InstitutionRequestInput): Promise<{ id?: string; pending?: boolean; error?: string }> {
     if (!supabase) return { error: "Supabase not configured" }
     const { data } = await supabase.auth.getUser()
     if (!data.user) return { error: "Not authenticated." }
-    // Auto-approve: the institution is created right away (migration 0004).
-    const { error } = await supabase.rpc("request_institution", {
+    // Auto-approve: the institution is created right away (migration 0004)
+    // and returned so the UI can select it immediately.
+    const { data: id, error } = await supabase.rpc("request_institution", {
       p_name: input.name,
       p_type: input.type,
       p_city: input.city,
@@ -254,10 +261,10 @@ class SupabaseService implements DataService {
         city: input.city,
       })
       if (insertError) return { error: mapError(insertError, "Could not submit institution request.") }
-      return {}
+      return { pending: true }
     }
     if (error) return { error: mapError(error, "Could not submit institution request.") }
-    return {}
+    return { id: typeof id === "string" ? id : undefined }
   }
 
   async listMyInstitutionRequests(): Promise<{ id: string; name: string; status: string }[]> {

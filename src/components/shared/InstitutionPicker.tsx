@@ -79,7 +79,21 @@ export function InstitutionPicker({ value, onChange, error }: Props) {
       toast.error(res.error)
       return
     }
-    toast.success("Institution added. You can now select it.")
+    if (res.id) {
+      onChange({
+        id: res.id,
+        name: reqName.trim(),
+        type: reqType as Institution["type"],
+        city: reqCity.trim(),
+        is_verified: true,
+        created_at: new Date().toISOString(),
+      })
+      toast.success("Institution added and selected.")
+    } else if (res.pending) {
+      toast.success("Institution request submitted. It will appear once approved.")
+    } else {
+      toast.success("Institution added. You can now select it.")
+    }
     setRequestOpen(false)
     setReqName("")
     setReqCity("")
@@ -169,7 +183,7 @@ export function InstitutionPicker({ value, onChange, error }: Props) {
           <DialogHeader>
             <DialogTitle>Request an institution</DialogTitle>
             <DialogDescription>
-              Your institution is added to the directory immediately and attached to your profile.
+              Your institution is added to the directory immediately and attached to your profile. No approval needed.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
