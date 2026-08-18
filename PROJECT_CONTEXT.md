@@ -1,6 +1,6 @@
 # CampusReuse — Project Context
 
-Last updated: 2026-08-17
+Last updated: 2026-08-18
 
 ## What this is
 
@@ -55,9 +55,16 @@ Migrations were battle-tested through several ordering/constraint bugs — the f
 - `npm run typecheck` clean, `npm run build` passes
 - Search, messaging (last_read_at unread logic), exchanges, notifications, admin pages, mobile-first UX (bottom sheets, sticky bars, gallery swipe, page headers) all implemented
 
+## Launch prep (2026-08-18)
+
+- Terms of Service + Privacy Policy pages live at `/terms` and `/privacy` (linked in footer); contact email `campusreuse@gmail.com`
+- All 3 demo listings + images deleted from live DB (see `supabase/cleanup_demo_listings.sql`); demo account `demo@campusreuse.app` kept as the admin/test account
+- **Decision: email confirmation ON for launch** — app already handles both flows (`needsEmailConfirmation`); local `supabase/config.toml` has `enable_confirmations = true`; live toggle + custom SMTP still to be set in Dashboard
+- OG/social meta tags in `index.html`; `public/robots.txt` added
+
 ## Next steps (when resuming)
 
-1. Deploy frontend (Vercel/Netlify) → `npm run build`, set auth Site URL + redirect URLs in Dashboard → Authentication → URL Configuration
-2. Decide email confirmations (currently OFF-ish: seed sets `email_confirmed_at`; new signups need confirmations enabled deliberately — `mailer_autoconfirm: false`)
+1. Deploy frontend (Vercel/Netlify) → `npm run build`, set auth Site URL + redirect URLs in Dashboard → Authentication → URL Configuration (still localhost)
+2. Dashboard: toggle "Confirm email" ON + finish custom SMTP setup (test from Dashboard → Emails → Custom SMTP)
 3. Git: add a remote and push history
 4. QA pass in the browser against live data (demo@ login → browse, create listing w/ photo upload, message, exchange proposal, admin page)
