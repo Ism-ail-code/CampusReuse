@@ -28,6 +28,8 @@ import { SignupPage } from "@/pages/auth/SignupPage"
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage"
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage"
 import { VerifyEmailPage } from "@/pages/auth/VerifyEmailPage"
+import { TermsPage } from "@/pages/legal/TermsPage"
+import { PrivacyPage } from "@/pages/legal/PrivacyPage"
 import { NotFoundPage } from "@/pages/NotFoundPage"
 
 export function App() {
@@ -129,6 +131,8 @@ export function App() {
                 }
               />
               <Route path="/u/:username" element={<PublicProfilePage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               <Route
                 path="/settings"
                 element={
