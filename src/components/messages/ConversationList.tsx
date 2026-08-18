@@ -6,16 +6,24 @@ import { UserAvatar } from "@/components/shared/UserAvatar"
 import { Skeleton } from "@/components/shared/Skeleton"
 import { cn, formatRelativeTime, truncate } from "@/lib/utils"
 import type { Conversation } from "@/lib/types"
+import { Button } from "@/components/ui/button"
 
 export function ConversationList({ activeId, onSelect }: { activeId?: string; onSelect?: (id: string) => void }) {
   const { service } = useApp()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const load = async () => {
-    const res = await service.getConversations()
-    setConversations(res)
-    setLoading(false)
+    setError(null)
+    try {
+      const res = await service.getConversations()
+      setConversations(res)
+    } catch {
+      setError("We couldn't load your messages.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -39,6 +47,19 @@ export function ConversationList({ activeId, onSelect }: { activeId?: string; on
             </div>
           </div>
         ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-2 p-8 text-center">
+        <MessageSquare className="h-8 w-8 text-muted-foreground/40" aria-hidden />
+        <p className="text-sm font-medium">Something went wrong</p>
+        <p className="text-xs text-muted-foreground">{error}</p>
+        <Button variant="outline" size="sm" onClick={load}>
+          Try again
+        </Button>
       </div>
     )
   }

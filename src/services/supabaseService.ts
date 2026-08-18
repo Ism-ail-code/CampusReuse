@@ -26,6 +26,13 @@ import type {
 
 const LISTING_STATUSES_ACTIVE = ["available", "reserved"] as const
 
+let realtimeChannelSeq = 0
+
+function uniqueChannel(base: string): string {
+  realtimeChannelSeq += 1
+  return `${base}:${realtimeChannelSeq}`
+}
+
 function mapError(error: unknown, fallback: string): string {
   if (error && typeof error === "object" && "message" in error) {
     return String((error as { message: unknown }).message)
@@ -738,7 +745,7 @@ class SupabaseService implements DataService {
     const client = supabase
     if (!client) return () => {}
     const channel = client
-      .channel(`messages:${conversationId}`)
+      .channel(uniqueChannel(`messages:${conversationId}`))
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
@@ -756,7 +763,7 @@ class SupabaseService implements DataService {
     const client = supabase
     if (!client) return () => {}
     const channel = client
-      .channel("conversations")
+      .channel(uniqueChannel("conversations"))
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "conversations" }, () => cb())
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "conversations" }, () => cb())
       .subscribe()
@@ -871,7 +878,7 @@ class SupabaseService implements DataService {
     const client = supabase
     if (!client) return () => {}
     const channel = client
-      .channel("notifications")
+      .channel(uniqueChannel("notifications"))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, () => cb())
       .subscribe()
     return () => {

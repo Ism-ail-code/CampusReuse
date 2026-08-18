@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary"
 import { AppProvider } from "./AppContext"
 import { AppLayout } from "@/components/layout/AppLayout"
 import { AuthGuard } from "@/components/shared/AuthGuard"
@@ -36,7 +37,8 @@ export function App() {
   return (
     <TooltipProvider delayDuration={200}>
       <BrowserRouter>
-        <AppProvider>
+        <ErrorBoundary>
+          <AppProvider>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -153,7 +155,8 @@ export function App() {
             </Route>
           </Routes>
           <Toaster position="top-center" richColors />
-        </AppProvider>
+          </AppProvider>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   )

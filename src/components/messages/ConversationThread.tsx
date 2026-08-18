@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
-import { ArrowLeft, ArrowLeftRight, MessageSquare, Send } from "lucide-react"
+import { toast } from "sonner"
+import { ArrowLeft, ArrowLeftRight, ChevronRight, MessageSquare, Send } from "lucide-react"
 import { useApp } from "@/app/AppContext"
 import { UserAvatar } from "@/components/shared/UserAvatar"
+import { VerificationBadges } from "@/components/shared/VerificationBadges"
 import { Skeleton } from "@/components/shared/Skeleton"
-import { cn, formatRelativeTime } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { cn, formatCurrency, formatRelativeTime, thumbUrl } from "@/lib/utils"
 import type { Conversation, Message } from "@/lib/types"
 
 export function ConversationThread({ conversationId, onBack }: { conversationId: string; onBack?: () => void }) {
@@ -16,25 +19,31 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
   const [sending, setSending] = useState(false)
   const [draft, setDraft] = useState("")
   const [notFound, setNotFound] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const load = async () => {
-    const conv = await service.getConversation(conversationId)
-    if (!conv) {
-      setNotFound(true)
+    setLoading(true)
+    setError(null)
+    setNotFound(false)
+    try {
+      const conv = await service.getConversation(conversationId)
+      if (!conv) {
+        setNotFound(true)
+        return
+      }
+      setConversation(conv)
+      const msgs = await service.getMessages(conversationId)
+      setMessages(msgs)
+      scrollToBottom()
+    } catch {
+      setError("We couldn't load this conversation.")
+    } finally {
       setLoading(false)
-      return
     }
-    setConversation(conv)
-    const msgs = await service.getMessages(conversationId)
-    setMessages(msgs)
-    setLoading(false)
-    scrollToBottom()
   }
 
   useEffect(() => {
-    setLoading(true)
-    setNotFound(false)
     setMessages([])
     setConversation(null)
     load()
@@ -69,7 +78,7 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
     setSending(true)
     const res = await service.sendMessage(conversationId, body)
     if (res.error) {
-      // surface error quietly for now
+      toast.error(res.error)
     } else {
       setDraft("")
     }
@@ -97,14 +106,48 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
+        <MessageSquare className="h-8 w-8 text-muted-foreground/40" aria-hidden />
+        <p className="text-sm font-medium">Unable to open conversation</p>
+        <p className="text-xs text-muted-foreground">{error}</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          <Button variant="outline" size="sm" onClick={load}>
+            Try Again
+          </Button>
+          {onBack ? (
+            <Button variant="ghost" size="sm" onClick={onBack}>
+              <ArrowLeft className="mr-1 h-4 w-4" aria-hidden />
+              Back to Listing
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/messages">Back to messages</Link>
+            </Button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   if (notFound || !conversation) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
         <MessageSquare className="h-8 w-8 text-muted-foreground/40" aria-hidden />
         <p className="text-sm font-medium">Conversation not found</p>
-        <Link to="/messages" className="text-sm font-medium text-primary hover:underline">
-          Back to messages
-        </Link>
+        <p className="text-xs text-muted-foreground">This conversation may have been removed.</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          {onBack ? (
+            <Button variant="outline" size="sm" onClick={onBack}>
+              <ArrowLeft className="mr-1 h-4 w-4" aria-hidden />
+              Back to Listing
+            </Button>
+          ) : null}
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/messages">Back to messages</Link>
+          </Button>
+        </div>
       </div>
     )
   }
@@ -115,6 +158,7 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
     : conversation.wanted
       ? `Wanted: ${conversation.wanted.title}`
       : "General chat"
+  const listing = conversation.listing
 
   return (
     <div className="flex h-full flex-col">
@@ -143,7 +187,40 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
             </p>
           </div>
         </Link>
+        {other && <VerificationBadges profile={other} />}
       </div>
+
+      {listing && (
+        <Link
+          to={`/listings/${listing.id}`}
+          className="flex items-center gap-2.5 border-b bg-muted/40 px-3 py-2 transition-colors hover:bg-muted/70"
+        >
+          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
+            {listing.images?.[0]?.url ? (
+              <img src={thumbUrl(listing.images[0].url)} alt={listing.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            ) : (
+              <MessageSquare className="h-4 w-4 text-muted-foreground/40" aria-hidden />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-foreground">{listing.title}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {listing.transaction_type === "sell" && listing.price != null ? (
+                formatCurrency(listing.price)
+              ) : listing.transaction_type === "exchange" ? (
+                <span className="inline-flex items-center gap-1 text-indigo-600">
+                  <ArrowLeftRight className="h-3 w-3" aria-hidden />
+                  Exchange
+                </span>
+              ) : (
+                <span className="text-emerald-600">Free</span>
+              )}
+              {listing.status === "reserved" && <span className="ml-1.5 text-amber-600">· Reserved</span>}
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" aria-hidden />
+        </Link>
+      )}
 
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
@@ -176,22 +253,24 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={send} className="flex items-center gap-2 border-t bg-card p-3">
-        <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          rows={1}
-          placeholder="Write a message…"
-          className="max-h-32 min-h-[42px] flex-1 resize-none rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
-        />
-        <button
-          type="submit"
-          disabled={!draft.trim() || sending}
-          className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity disabled:opacity-50"
-          aria-label="Send"
-        >
-          <Send className="h-5 w-5" aria-hidden />
-        </button>
+      <form onSubmit={send} className="border-t bg-card p-3">
+        <div className="flex items-center gap-2">
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={1}
+            placeholder="Write a message…"
+            className="max-h-32 min-h-[42px] flex-1 resize-none rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          <button
+            type="submit"
+            disabled={!draft.trim() || sending}
+            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity disabled:opacity-50"
+            aria-label="Send"
+          >
+            <Send className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
       </form>
     </div>
   )
