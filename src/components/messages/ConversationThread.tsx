@@ -222,7 +222,7 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
         </Link>
       )}
 
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div className="flex-1 space-y-3 overflow-y-auto px-3 py-3 md:p-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
             <MessageSquare className="h-8 w-8 text-muted-foreground/40" aria-hidden />
@@ -236,7 +236,7 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
             <div key={m.id} className={cn("flex", mine ? "justify-end" : "justify-start")}>
               <div
                 className={cn(
-                  "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
+                  "max-w-[80%] rounded-2xl px-3.5 py-2 text-sm md:max-w-[75%]",
                   mine
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground",
@@ -253,7 +253,7 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={send} className="border-t bg-card p-3">
+      <form onSubmit={send} className="border-t bg-card px-3 py-2.5 md:p-3">
         <div className="flex items-center gap-2">
           <textarea
             value={draft}

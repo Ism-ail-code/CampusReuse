@@ -17,10 +17,10 @@ export function MessagesPage() {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-9rem)] max-w-5xl flex-col overflow-hidden rounded-2xl border bg-card shadow-card md:h-[calc(100vh-8rem)]">
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-full overflow-y-auto border-r md:w-80 lg:w-96">
-          <div className="flex items-center gap-2 border-b px-4 py-3">
+    <div className="mx-auto flex h-[calc(100dvh-7.75rem-env(safe-area-inset-bottom))] max-w-5xl flex-col overflow-hidden bg-card md:h-[calc(100dvh-8rem)] md:rounded-2xl md:border md:shadow-card">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <aside className="w-full overflow-y-auto md:w-80 md:border-r lg:w-96">
+          <div className="flex items-center gap-2 border-b px-3 py-2.5 md:px-4 md:py-3">
             <MessageSquare className="h-5 w-5 text-primary" aria-hidden />
             <h2 className="text-base font-bold">Messages</h2>
           </div>

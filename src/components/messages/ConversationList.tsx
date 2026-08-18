@@ -86,7 +86,7 @@ export function ConversationList({ activeId, onSelect }: { activeId?: string; on
             <UserAvatar
               name={c.other_participant?.display_name ?? "User"}
               src={c.other_participant?.avatar_url}
-              className={cn("h-11 w-11 shrink-0", unread && "ring-2 ring-primary/40")}
+              className={cn("h-10 w-10 shrink-0 md:h-11 md:w-11", unread && "ring-2 ring-primary/40")}
             />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
@@ -117,7 +117,7 @@ export function ConversationList({ activeId, onSelect }: { activeId?: string; on
         )
 
         const rowClass = cn(
-          "flex w-full items-center gap-3 p-3 text-left transition-colors hover:bg-muted/60",
+          "flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-muted/60 md:gap-3 md:p-3",
           activeId === c.id && "bg-muted/70",
         )
 
