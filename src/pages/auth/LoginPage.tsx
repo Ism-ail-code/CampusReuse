@@ -42,7 +42,7 @@ export function LoginPage() {
       footer={
         <>
           New to CampusReuse?{" "}
-          <Link to="/signup" className="font-medium text-primary hover:underline">
+          <Link to={`/signup?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">
             Create a free account
           </Link>
         </>

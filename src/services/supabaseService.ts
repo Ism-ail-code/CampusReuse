@@ -103,6 +103,22 @@ class SupabaseService implements DataService {
     return { needsEmailConfirmation: !result.session }
   }
 
+  async resendVerificationEmail(email: string): Promise<{ error?: string; rateLimited?: boolean }> {
+    if (!supabase) return { error: "Supabase not configured" }
+    const { error } = await supabase.auth.resend({ type: "signup", email })
+    if (error) {
+      const msg = String(error.message ?? "").toLowerCase()
+      if (msg.includes("rate limit")) {
+        return { error: "We couldn't send another email yet. Please wait a little and try again.", rateLimited: true }
+      }
+      if (msg.includes("already") && (msg.includes("confirm") || msg.includes("verif"))) {
+        return {}
+      }
+      return { error: "We couldn't send the verification email. Please try again." }
+    }
+    return {}
+  }
+
   async signIn(email: string, password: string): Promise<{ error?: string }> {
     if (!supabase) return { error: "Supabase not configured" }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -216,12 +232,23 @@ class SupabaseService implements DataService {
     if (!supabase) return { error: "Supabase not configured" }
     const { data } = await supabase.auth.getUser()
     if (!data.user) return { error: "Not authenticated." }
-    const { error } = await supabase.from("institution_requests").insert({
-      user_id: data.user.id,
-      name: input.name,
-      type: input.type,
-      city: input.city,
+    // Auto-approve: the institution is created right away (migration 0004).
+    const { error } = await supabase.rpc("request_institution", {
+      p_name: input.name,
+      p_type: input.type,
+      p_city: input.city,
     })
+    if (error && String(error.message).includes("request_institution")) {
+      // RPC not deployed yet — fall back to the legacy pending-request flow.
+      const { error: insertError } = await supabase.from("institution_requests").insert({
+        user_id: data.user.id,
+        name: input.name,
+        type: input.type,
+        city: input.city,
+      })
+      if (insertError) return { error: mapError(insertError, "Could not submit institution request.") }
+      return {}
+    }
     if (error) return { error: mapError(error, "Could not submit institution request.") }
     return {}
   }

@@ -66,3 +66,10 @@ export function getErrorMessage(error: unknown, fallback = "Something went wrong
   }
   return fallback
 }
+
+/** Rewrite a Supabase storage public URL into a resized thumbnail URL. */
+export function thumbUrl(url: string, width = 600): string {
+  const m = url.match(/^(.+?)\/storage\/v1\/object\/public\/(.+)$/)
+  if (!m) return url
+  return `${m[1]}/storage/v1/render/image/public/${m[2]}?width=${width}&quality=80`
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Clock, PlusCircle, RotateCcw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import type { WantedPost } from "@/lib/types"
 
 export function MyWantedPage() {
   const { service } = useApp()
+  const navigate = useNavigate()
   const [posts, setPosts] = useState<WantedPost[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -71,7 +72,7 @@ export function MyWantedPage() {
             title="No wanted posts yet"
             description="Post what you're looking for and let students with the material respond."
             actionLabel="Create a wanted post"
-            onAction={() => (window.location.href = "/wanted/new")}
+            onAction={() => navigate("/wanted/new")}
           />
         ) : (
           <div className="space-y-3">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import {
   ArrowRight,
   BookOpen,
@@ -23,6 +23,7 @@ import type { Listing, WantedPost } from "@/lib/types"
 
 export function HomePage() {
   const { service, session } = useApp()
+  const navigate = useNavigate()
   const [listings, setListings] = useState<Listing[]>([])
   const [wanted, setWanted] = useState<WantedPost[]>([])
   const [loading, setLoading] = useState(true)
@@ -128,10 +129,10 @@ export function HomePage() {
             title="No listings yet"
             description="Be the first to list an academic material in your community."
             actionLabel="List an item"
-            onAction={() => (window.location.href = "/listings/new")}
+            onAction={() => navigate("/listings/new")}
           />
         ) : (
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {listings.slice(0, 8).map((l) => (
               <ListingCard key={l.id} listing={l} />
             ))}

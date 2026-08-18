@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import {
   ArrowLeftRight,
   CalendarClock,
@@ -36,6 +36,7 @@ import type { Listing } from "@/lib/types"
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { service, session, requireAuth } = useApp()
   const [listing, setListing] = useState<Listing | null>(null)
   const [similar, setSimilar] = useState<Listing[]>([])
@@ -100,7 +101,7 @@ export function ListingDetailPage() {
       toast.error(res.error)
       return
     }
-    window.location.href = `/messages/${res.id}`
+    navigate(`/messages/${res.id}`)
   }
 
   const setStatus = async (status: Listing["status"], label: string) => {
@@ -135,7 +136,7 @@ export function ListingDetailPage() {
     if (res.error) toast.error(res.error)
     else {
       toast.success("Listing deleted.")
-      window.location.href = "/my-listings"
+      navigate("/my-listings")
     }
   }
 
@@ -560,7 +561,7 @@ export function ListingDetailPage() {
       {similar.length > 0 && (
         <div className="mt-10">
           <h2 className="text-lg font-bold text-foreground">Similar materials</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((l) => (
               <ListingCard key={l.id} listing={l} />
             ))}

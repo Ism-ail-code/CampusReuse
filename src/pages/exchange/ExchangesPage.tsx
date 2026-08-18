@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { ArrowLeftRight, ArrowRight, CheckCircle2, Loader2, MessageSquare, XCircle } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ type Direction = "incoming" | "outgoing"
 
 export function ExchangesPage() {
   const { service, session } = useApp()
+  const navigate = useNavigate()
   const [proposals, setProposals] = useState<ExchangeProposal[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Direction>("incoming")
@@ -64,7 +65,7 @@ export function ExchangesPage() {
       toast.error(res.error)
       return
     }
-    window.location.assign(`/messages/${res.id}`)
+    navigate(`/messages/${res.id}`)
   }
 
   if (loading) {
@@ -104,7 +105,7 @@ export function ExchangesPage() {
                 : "Find an exchange listing you need and propose one of your own items in return."
             }
             actionLabel={tab === "incoming" ? "Browse listings" : undefined}
-            onAction={tab === "incoming" ? () => (window.location.href = "/browse") : undefined}
+            onAction={tab === "incoming" ? () => navigate("/browse") : undefined}
           />
         ) : (
           visible.map((p) => {

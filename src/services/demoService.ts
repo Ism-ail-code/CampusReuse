@@ -562,6 +562,10 @@ export class DemoService implements DataService {
     return {}
   }
 
+  async resendVerificationEmail(_email: string): Promise<{ error?: string; rateLimited?: boolean }> {
+    return {}
+  }
+
   async signIn(email: string, password: string): Promise<{ error?: string }> {
     const normalized = email.trim().toLowerCase()
     if (this.db.authPasswords[normalized] !== password) return { error: "Invalid email or password." }
@@ -652,18 +656,24 @@ export class DemoService implements DataService {
 
   async requestInstitution(input: InstitutionRequestInput): Promise<{ error?: string }> {
     if (!this.sessionUserId) return { error: "Not authenticated." }
-    if (this.db.institutions.some((i) => i.name.toLowerCase() === input.name.trim().toLowerCase())) {
-      return { error: "This institution already exists." }
+    const name = input.name.trim()
+    let inst = this.db.institutions.find((i) => i.name.toLowerCase() === name.toLowerCase())
+    if (!inst) {
+      inst = { id: uid("inst"), name, type: input.type, city: input.city, is_verified: false, created_at: nowIso() }
+      this.db.institutions.push(inst)
     }
+    const p = this.db.profiles.find((x) => x.id === this.sessionUserId)
+    if (p) p.institution_id = inst.id
     this.db.institutionRequests.unshift({
       id: uid("ir"),
       user_id: this.sessionUserId,
-      name: input.name,
+      name,
       type: input.type,
       city: input.city,
-      status: "pending",
+      status: "approved",
       created_at: nowIso(),
     })
+    enrichProfiles(this.db)
     this.persist()
     return {}
   }

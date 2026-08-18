@@ -77,6 +77,7 @@ export interface DataService {
   signOut(): Promise<void>
   resetPassword(email: string): Promise<{ error?: string }>
   updatePassword(newPassword: string): Promise<{ error?: string }>
+  resendVerificationEmail(email: string): Promise<{ error?: string; rateLimited?: boolean }>
 
   // ---- Profiles ----
   getProfile(id: string): Promise<UserProfile | null>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import {
   ArrowLeftRight,
   Bell,
@@ -42,6 +42,7 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
 
 export function NotificationsPage() {
   const { service, refreshUnread } = useApp()
+  const navigate = useNavigate()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<"all" | "unread">("all")
@@ -69,7 +70,10 @@ export function NotificationsPage() {
       setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, is_read: true } : x)))
       refreshUnread()
     }
-    if (n.link) window.location.assign(n.link)
+    if (n.link) {
+      if (n.link.startsWith("/")) navigate(n.link)
+      else window.location.assign(n.link)
+    }
   }
 
   const markAll = async () => {

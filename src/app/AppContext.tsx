@@ -32,6 +32,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [unreadNotifications, setUnreadNotifications] = useState(0)
+  const navigate = useNavigate()
 
   const refreshUnread = useCallback(async () => {
     if (!session?.user.id) {
@@ -56,11 +57,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const requireAuth = useCallback(
     (navigateTo?: string) => {
       if (session) return true
-      if (navigateTo) window.location.assign(`/login?next=${encodeURIComponent(navigateTo)}`)
-      else window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`)
+      const dest = navigateTo ?? `${window.location.pathname}${window.location.search}`
+      navigate(`/login?next=${encodeURIComponent(dest)}`)
       return false
     },
-    [session],
+    [session, navigate],
   )
 
   useEffect(() => {

@@ -23,6 +23,7 @@ CampusReuse is a student academic-materials marketplace (Pakistan-focused): sell
 - Project ref: `tgfqanqmxxwarfdzlmjj` → https://tgfqanqmxxwarfdzlmjj.supabase.co
 - Anon key: `sb_publishable_fMLDXbp8X3ArhTGayy0YtQ_1ueQTVPm` (in `.env.local`; also Dashboard → Project Settings → API)
 - Demo account: `demo@campusreuse.app` / `DemoPass123!` — single account, **role = admin** (so every page is testable)
+- **Listing-card thumbnails** use the storage `render/image` endpoint (`thumbUrl` in `src/lib/utils.ts`, falls back to the full URL on error) — requires **Image Transformations enabled** in the live project, otherwise cards still work with full-size images
 
 ## Supabase SQL files (in `supabase/`)
 
@@ -33,6 +34,7 @@ All applied to the live project via Dashboard → SQL Editor, in this order:
 | `migrations/0001_initial_schema.sql` | Full schema: tables, RLS policies, triggers, RPCs (`start_conversation`, `respond_to_wanted`, `propose_exchange`, `update_exchange_proposal`, `is_admin`, `make_admin`, `is_participant`, `expire_stale_items`), storage buckets + policies |
 | `migrations/0002_fix_conversation_policies.sql` | Patch: replaced recursive RLS policies with the `is_participant` security-definer helper |
 | `migrations/0003_cron.sql` | Optional hourly `expire_stale_items` cron via `pg_cron` |
+| `migrations/0004_auto_approve_institutions.sql` | **NOT APPLIED YET.** RPC `request_institution` — creates the institution immediately (no admin review), attaches it to the requester's profile, records an `approved` request |
 | `seed.sql` | Idempotent: ~90 institutions, ONE demo user (demo@, admin), 3 demo listings + images |
 | `fix_demo_auth.sql` | One-off live-DB fix: NULL→'' auth token columns + make demo@ admin |
 | `cleanup_demo_users.sql` | One-off: removed all other seeded users (cascades their data) |
@@ -57,7 +59,7 @@ Migrations were battle-tested through several ordering/constraint bugs — the f
 ├── SESSION_LOG.md              # session decisions log (email confirmations)
 ├── supabase/
 │   ├── config.toml             # local dev; enable_confirmations = true
-│   ├── migrations/             # 0001 schema, 0002 policy fix, 0003 cron
+│   ├── migrations/             # 0001 schema, 0002 policy fix, 0003 cron, 0004 auto-approve institutions
 │   ├── seed.sql                # institutions + demo user + demo listings
 │   └── cleanup_*.sql, fix_*.sql
 ├── public/
@@ -96,14 +98,15 @@ Migrations were battle-tested through several ordering/constraint bugs — the f
 
 ## Launch decisions (2026-08-18)
 
-- **Email confirmation: ON for launch** (recorded in `SESSION_LOG.md`) — app handles both flows via `needsEmailConfirmation`; local `config.toml` enabled; **live Dashboard toggle + custom SMTP still pending user**
+- **Email confirmation: ON for launch** (recorded in `SESSION_LOG.md`) — app handles both flows via `needsEmailConfirmation`; local `config.toml` enabled; **live Dashboard toggle + custom SMTP still pending user**. The verify screen has a resend button with a 60s cooldown, rate-limit-friendly errors, and auto-detects a confirmed email (`resendVerificationEmail` on `DataService`).
 - Privacy contact email: `campusreuse@gmail.com` (placeholder-free)
 - Deploy provider: undecided (Vercel or Netlify); **deploy config file (`vercel.json`/`netlify.toml`) still needed for SPA deep-link fallback**
 
 ## Next steps (when resuming)
 
-1. **Push**: `git push -u origin main` (10 commits waiting)
-2. **Deploy** frontend (Vercel/Netlify) — add `vercel.json` or `netlify.toml` SPA rewrite first
-3. **Dashboard**: set auth Site URL + redirect URLs to prod domain (Authentication → URL Configuration — still localhost)
-4. **Dashboard**: test custom SMTP (Authentication → Emails → Custom SMTP → "Test SMTP settings"), then toggle "Confirm email" ON
-5. **QA pass** against live data (demo@ login → browse, create listing w/ photo upload, message, exchange proposal, admin page)
+1. **Apply `0004_auto_approve_institutions.sql`** to the live project (Dashboard → SQL Editor) — makes institution requests instant; until then the app falls back to the old pending flow
+2. **Push**: `git push -u origin main` (10 commits waiting)
+3. **Deploy** frontend (Vercel/Netlify) — add `vercel.json` or `netlify.toml` SPA rewrite first
+4. **Dashboard**: set auth Site URL + redirect URLs to prod domain (Authentication → URL Configuration — still localhost)
+5. **Dashboard**: test custom SMTP (Authentication → Emails → Custom SMTP → "Test SMTP settings"), then toggle "Confirm email" ON
+6. **QA pass** against live data (demo@ login → browse, create listing w/ photo upload, message, exchange proposal, admin page)

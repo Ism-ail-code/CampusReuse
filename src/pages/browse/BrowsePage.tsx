@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link, useSearchParams } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { FilterX, Search, SlidersHorizontal, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,6 +63,7 @@ function readFromParams(params: URLSearchParams): FilterState {
 
 export function BrowsePage() {
   const { service, session } = useApp()
+  const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const [filters, setFilters] = useState<FilterState>(() => readFromParams(params))
   const [listings, setListings] = useState<Listing[]>([])
@@ -321,12 +322,12 @@ export function BrowsePage() {
               title="No matching listings"
               description="Try adjusting your search or filters, or list the item yourself."
               actionLabel="List an item"
-              onAction={() => (window.location.href = "/listings/new")}
+              onAction={() => navigate("/listings/new")}
             />
           ) : (
             <>
               <p className="mb-4 text-xs text-muted-foreground">{listings.length} listing(s) found.</p>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {listings.map((l) => (
                   <ListingCard key={l.id} listing={l} />
                 ))}

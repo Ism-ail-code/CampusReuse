@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { BookOpen, CalendarDays, GraduationCap, MapPin, Pencil, ShieldAlert, UserRound } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ import type { Listing, UserProfile } from "@/lib/types"
 export function PublicProfilePage() {
   const { username } = useParams<{ username: string }>()
   const { service, session } = useApp()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
@@ -185,10 +186,10 @@ export function PublicProfilePage() {
                 : "This member doesn't have any active listings right now."
             }
             actionLabel={isMine ? "List an item" : undefined}
-            onAction={isMine ? () => (window.location.href = "/listings/new") : undefined}
+            onAction={isMine ? () => navigate("/listings/new") : undefined}
           />
         ) : (
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {listings.map((l) => (
               <ListingCard key={l.id} listing={l} />
             ))}

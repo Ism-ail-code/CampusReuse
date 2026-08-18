@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { useSearchParams } from "react-router-dom"
-import { Link } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { PlusCircle, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +19,7 @@ import type { WantedPost } from "@/lib/types"
 
 export function WantedBrowsePage() {
   const { service, session } = useApp()
+  const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const [posts, setPosts] = useState<WantedPost[]>([])
   const [loading, setLoading] = useState(true)
@@ -114,7 +114,7 @@ export function WantedBrowsePage() {
             title={query ? `No wanted posts match "${query}"` : "No active wanted posts"}
             description="Be the first to post what you're looking for — other students can respond directly."
             actionLabel="Post a wanted request"
-            onAction={() => (window.location.href = "/wanted/new")}
+            onAction={() => navigate("/wanted/new")}
           />
         ) : (
           <>

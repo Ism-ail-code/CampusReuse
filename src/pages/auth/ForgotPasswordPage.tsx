@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { Loader2, MailCheck } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,8 @@ import { AuthShell } from "./AuthShell"
 
 export function ForgotPasswordPage() {
   const { service } = useApp()
+  const [params] = useSearchParams()
+  const next = params.get("next") || "/"
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -31,7 +33,7 @@ export function ForgotPasswordPage() {
       <AuthShell
         title="Check your email"
         subtitle="If an account exists for that address, we've sent you a link to reset your password."
-        footer={<Link to="/login" className="font-medium text-primary hover:underline">Back to sign in</Link>}
+        footer={<Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">Back to sign in</Link>}
       >
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
@@ -47,7 +49,7 @@ export function ForgotPasswordPage() {
     <AuthShell
       title="Reset your password"
       subtitle="Enter your email and we'll send you a reset link."
-      footer={<Link to="/login" className="font-medium text-primary hover:underline">Back to sign in</Link>}
+      footer={<Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">Back to sign in</Link>}
     >
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-2">

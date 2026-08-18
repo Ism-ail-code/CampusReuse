@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Pencil, PlusCircle, RotateCcw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ import type { Listing } from "@/lib/types"
 
 export function MyListingsPage() {
   const { service } = useApp()
+  const navigate = useNavigate()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -86,7 +87,7 @@ export function MyListingsPage() {
             title="You haven't listed anything yet"
             description="List a textbook, notes, guide, calculator, or notebook you no longer need."
             actionLabel="List your first item"
-            onAction={() => (window.location.href = "/listings/new")}
+            onAction={() => navigate("/listings/new")}
           />
         ) : (
           <div className="space-y-3">

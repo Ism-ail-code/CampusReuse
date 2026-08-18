@@ -25,11 +25,12 @@ export function SignupPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const next = params.get("next") || "/"
+  const prefilledEmail = params.get("email") || ""
 
   const [displayName, setDisplayName] = useState("")
   const [username, setUsername] = useState("")
   const [usernameState, setUsernameState] = useState<"idle" | "checking" | "available" | "taken">("idle")
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(prefilledEmail)
   const [password, setPassword] = useState("")
   const [accountType, setAccountType] = useState<"student" | "teacher">("student")
   const [educationLevel, setEducationLevel] = useState("")
@@ -83,7 +84,7 @@ export function SignupPage() {
       return
     }
     if (res.needsEmailConfirmation) {
-      navigate(`/verify-email?email=${encodeURIComponent(email)}`)
+      navigate(`/verify-email?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`)
       return
     }
     toast.success("Your account is ready!")
@@ -97,7 +98,7 @@ export function SignupPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" className="font-medium text-primary hover:underline">
+          <Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">
             Sign in
           </Link>
         </>

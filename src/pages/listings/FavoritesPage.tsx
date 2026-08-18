@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Heart } from "lucide-react"
 import { useApp } from "@/app/AppContext"
 import { ListingCard } from "@/components/shared/ListingCard"
@@ -10,6 +10,7 @@ import type { Listing } from "@/lib/types"
 
 export function FavoritesPage() {
   const { service } = useApp()
+  const navigate = useNavigate()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -39,10 +40,10 @@ export function FavoritesPage() {
             title="No saved listings yet"
             description="Tap the heart on any listing to save it here for later."
             actionLabel="Browse materials"
-            onAction={() => (window.location.href = "/browse")}
+            onAction={() => navigate("/browse")}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {listings.map((l) => (
               <ListingCard key={l.id} listing={l} />
             ))}

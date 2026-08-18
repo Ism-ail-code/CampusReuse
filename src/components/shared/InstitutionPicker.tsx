@@ -79,7 +79,7 @@ export function InstitutionPicker({ value, onChange, error }: Props) {
       toast.error(res.error)
       return
     }
-    toast.success("Institution requested. We'll add it once reviewed.")
+    toast.success("Institution added. You can now select it.")
     setRequestOpen(false)
     setReqName("")
     setReqCity("")
@@ -169,7 +169,7 @@ export function InstitutionPicker({ value, onChange, error }: Props) {
           <DialogHeader>
             <DialogTitle>Request an institution</DialogTitle>
             <DialogDescription>
-              Your institution will be added once a moderator reviews it. This keeps the directory clean.
+              Your institution is added to the directory immediately and attached to your profile.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
