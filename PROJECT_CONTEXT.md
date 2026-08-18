@@ -36,6 +36,7 @@ All applied to the live project via Dashboard → SQL Editor, in this order:
 | `seed.sql` | Idempotent: ~90 institutions, ONE demo user (demo@, admin), 3 demo listings + images |
 | `fix_demo_auth.sql` | One-off live-DB fix: NULL→'' auth token columns + make demo@ admin |
 | `cleanup_demo_users.sql` | One-off: removed all other seeded users (cascades their data) |
+| `cleanup_demo_listings.sql` | One-off (2026-08-18, applied): removed the 3 demo listings + images from live DB |
 
 Migrations were battle-tested through several ordering/constraint bugs — the file order inside `0001` matters (tables before policies/functions referencing them, FKs only to earlier tables, `is_admin` is plpgsql to defer validation).
 
@@ -43,28 +44,66 @@ Migrations were battle-tested through several ordering/constraint bugs — the f
 
 **Never insert `auth.users` rows with NULL token columns.** GoTrue scans `confirmation_token`, `recovery_token`, `email_change_token_new`, `email_change`, `phone_change`, `phone_change_token`, `email_change_token_current`, `reauthentication_token` into strings; NULL → `500 Database error querying schema` on every login. Manual inserts must provide `''` for those and `false` for `is_super_admin` (the seed now does this).
 
+## State of files
+
+```
+.
+├── index.html                  # OG/social meta tags, theme-color, fonts
+├── package.json                # build/typecheck/lint scripts (lint = typecheck)
+├── vite.config.ts              # @ alias → src/
+├── .env.local                  # LIVE Supabase URL + anon key (gitignored)
+├── .env.example                # template; empty = demo mode
+├── PROJECT_CONTEXT.md          # this file
+├── SESSION_LOG.md              # session decisions log (email confirmations)
+├── supabase/
+│   ├── config.toml             # local dev; enable_confirmations = true
+│   ├── migrations/             # 0001 schema, 0002 policy fix, 0003 cron
+│   ├── seed.sql                # institutions + demo user + demo listings
+│   └── cleanup_*.sql, fix_*.sql
+├── public/
+│   ├── favicon.svg
+│   └── robots.txt              # Allow all
+└── src/
+    ├── main.tsx                # entry
+    ├── index.css               # Tailwind 4 + theme tokens
+    ├── app/                    # App.tsx (routes) + AppContext.tsx (auth/unread/notifs)
+    ├── components/
+    │   ├── ui/                 # shadcn/ui primitives (button, input, dialog…)
+    │   ├── layout/             # AppLayout, Navbar, MobileNav, Footer, Logo
+    │   └── shared/             # PageHeader, ListingCard, EmptyState, AuthGuard…
+    ├── lib/                    # types, utils, institutions catalog, supabase client
+    ├── pages/
+    │   ├── home|browse|listingDetail|listings|wanted|messages|exchange|notifications|profile|admin|auth|legal| NotFound
+    │   └── legal/              # TermsPage.tsx, PrivacyPage.tsx (contact: campusreuse@gmail.com)
+    └── services/               # index.ts (DataService), service.ts, supabaseService.ts, demoService.ts
+```
+
 ## Git state
 
-- Branch `master`, identity: `aalikhan <aalikhanpubg@gmail.com>` (user.name local, email global)
-- ~30 small commits; working tree clean at last check. No remote configured yet.
+- Branch **`main`** (renamed from `master`), identity: `aalikhan <aalikhanpubg@gmail.com>` (user.name local, email global)
+- Remote configured: `origin` → https://github.com/Ism-ail-code/CampusReuse.git
+- **40 commits total**; local `main` is **10 commits ahead of `origin/main` — NOT pushed yet** (user pushes manually)
+- Latest commits (2026-08-18): Terms page, Privacy page, legal routes, footer links, session log, email-confirmation local config, project-context update, demo-listing cleanup script, social meta tags, robots.txt
 - `.gitignore` covers `node_modules`, `dist`, `.env*`, `*.tsbuildinfo`
+- Working tree clean; `npm run typecheck` and `npm run build` pass
 
-## Verified working (last session)
+## Verified working
 
 - Demo login via GoTrue API, admin role confirmed, RLS reads OK (profiles, institutions, categories, listings)
-- `npm run typecheck` clean, `npm run build` passes
 - Search, messaging (last_read_at unread logic), exchanges, notifications, admin pages, mobile-first UX (bottom sheets, sticky bars, gallery swipe, page headers) all implemented
+- Terms + Privacy pages render at `/terms` and `/privacy`; footer links work
+- All 3 demo listings + images deleted from live DB (verified 0 remaining); demo account kept as admin/test account
 
-## Launch prep (2026-08-18)
+## Launch decisions (2026-08-18)
 
-- Terms of Service + Privacy Policy pages live at `/terms` and `/privacy` (linked in footer); contact email `campusreuse@gmail.com`
-- All 3 demo listings + images deleted from live DB (see `supabase/cleanup_demo_listings.sql`); demo account `demo@campusreuse.app` kept as the admin/test account
-- **Decision: email confirmation ON for launch** — app already handles both flows (`needsEmailConfirmation`); local `supabase/config.toml` has `enable_confirmations = true`; live toggle + custom SMTP still to be set in Dashboard
-- OG/social meta tags in `index.html`; `public/robots.txt` added
+- **Email confirmation: ON for launch** (recorded in `SESSION_LOG.md`) — app handles both flows via `needsEmailConfirmation`; local `config.toml` enabled; **live Dashboard toggle + custom SMTP still pending user**
+- Privacy contact email: `campusreuse@gmail.com` (placeholder-free)
+- Deploy provider: undecided (Vercel or Netlify); **deploy config file (`vercel.json`/`netlify.toml`) still needed for SPA deep-link fallback**
 
 ## Next steps (when resuming)
 
-1. Deploy frontend (Vercel/Netlify) → `npm run build`, set auth Site URL + redirect URLs in Dashboard → Authentication → URL Configuration (still localhost)
-2. Dashboard: toggle "Confirm email" ON + finish custom SMTP setup (test from Dashboard → Emails → Custom SMTP)
-3. Git: add a remote and push history
-4. QA pass in the browser against live data (demo@ login → browse, create listing w/ photo upload, message, exchange proposal, admin page)
+1. **Push**: `git push -u origin main` (10 commits waiting)
+2. **Deploy** frontend (Vercel/Netlify) — add `vercel.json` or `netlify.toml` SPA rewrite first
+3. **Dashboard**: set auth Site URL + redirect URLs to prod domain (Authentication → URL Configuration — still localhost)
+4. **Dashboard**: test custom SMTP (Authentication → Emails → Custom SMTP → "Test SMTP settings"), then toggle "Confirm email" ON
+5. **QA pass** against live data (demo@ login → browse, create listing w/ photo upload, message, exchange proposal, admin page)
