@@ -244,9 +244,20 @@ class SupabaseService implements DataService {
   async requestInstitution(input: InstitutionRequestInput): Promise<{ id?: string; pending?: boolean; error?: string }> {
     if (!supabase) return { error: "Supabase not configured" }
     const { data } = await supabase.auth.getUser()
-    if (!data.user) return { error: "Not authenticated." }
-    // Auto-approve: the institution is created right away (migration 0004)
-    // and returned so the UI can select it immediately.
+    if (!data.user) {
+      // Not signed in (e.g. on the signup page): create the institution
+      // without attaching a profile. The signup trigger attaches it once
+      // the account exists.
+      const { data: id, error } = await supabase.rpc("create_institution", {
+        p_name: input.name,
+        p_type: input.type,
+        p_city: input.city,
+      })
+      if (error) return { error: mapError(error, "Could not add institution.") }
+      return { id: typeof id === "string" ? id : undefined }
+    }
+    // Signed in: auto-approve (migration 0004) — created, verified,
+    // attached to the profile, and returned so the UI selects it.
     const { data: id, error } = await supabase.rpc("request_institution", {
       p_name: input.name,
       p_type: input.type,

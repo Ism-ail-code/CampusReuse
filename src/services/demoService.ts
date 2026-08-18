@@ -655,28 +655,30 @@ export class DemoService implements DataService {
   }
 
   async requestInstitution(input: InstitutionRequestInput): Promise<{ id?: string; pending?: boolean; error?: string }> {
-    if (!this.sessionUserId) return { error: "Not authenticated." }
     const name = input.name.trim()
     let inst = this.db.institutions.find((i) => i.name.toLowerCase() === name.toLowerCase())
     if (!inst) {
       inst = { id: uid("inst"), name, type: input.type, city: input.city, is_verified: true, created_at: nowIso() }
       this.db.institutions.push(inst)
     }
-    const p = this.db.profiles.find((x) => x.id === this.sessionUserId)
-    if (p) {
-      p.institution_id = inst.id
-      p.institution_verified = true
+    // If signed in, attach it to the profile and record the request.
+    if (this.sessionUserId) {
+      const p = this.db.profiles.find((x) => x.id === this.sessionUserId)
+      if (p) {
+        p.institution_id = inst.id
+        p.institution_verified = true
+      }
+      this.db.institutionRequests.unshift({
+        id: uid("ir"),
+        user_id: this.sessionUserId,
+        name,
+        type: input.type,
+        city: input.city,
+        status: "approved",
+        created_at: nowIso(),
+      })
+      enrichProfiles(this.db)
     }
-    this.db.institutionRequests.unshift({
-      id: uid("ir"),
-      user_id: this.sessionUserId,
-      name,
-      type: input.type,
-      city: input.city,
-      status: "approved",
-      created_at: nowIso(),
-    })
-    enrichProfiles(this.db)
     this.persist()
     return { id: inst.id }
   }
