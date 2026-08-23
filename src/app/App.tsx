@@ -24,6 +24,7 @@ import { NotificationsPage } from "@/pages/notifications/NotificationsPage"
 import { PublicProfilePage } from "@/pages/profile/PublicProfilePage"
 import { SettingsPage } from "@/pages/profile/SettingsPage"
 import { AdminPage } from "@/pages/admin/AdminPage"
+import { AuthEntryPage } from "@/pages/auth/AuthEntryPage"
 import { LoginPage } from "@/pages/auth/LoginPage"
 import { SignupPage } from "@/pages/auth/SignupPage"
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage"
@@ -40,6 +41,7 @@ export function App() {
         <ErrorBoundary>
           <AppProvider>
           <Routes>
+            <Route path="/auth" element={<AuthEntryPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />

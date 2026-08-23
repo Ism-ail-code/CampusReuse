@@ -7,7 +7,7 @@ export function AuthGuard({ children, adminOnly = false }: { children: React.Rea
 
   if (loading) return null
   if (!session?.user.id) {
-    return <Navigate to={`/login?next=${encodeURIComponent(location.pathname + location.search)}`} replace />
+    return <Navigate to={`/auth?next=${encodeURIComponent(location.pathname + location.search)}`} replace />
   }
   if (adminOnly && session.profile.role !== "admin") {
     return <Navigate to="/" replace />

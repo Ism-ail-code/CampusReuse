@@ -58,7 +58,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (navigateTo?: string) => {
       if (session) return true
       const dest = navigateTo ?? `${window.location.pathname}${window.location.search}`
-      navigate(`/login?next=${encodeURIComponent(dest)}`)
+      navigate(`/auth?next=${encodeURIComponent(dest)}`)
       return false
     },
     [session, navigate],

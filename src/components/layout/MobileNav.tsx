@@ -13,7 +13,7 @@ export function MobileNav() {
     ...(session?.user.id ? [{ to: "/listings/new", label: "Sell", icon: PlusCircle, end: false }] : []),
     { to: "/messages", label: "Messages", icon: MessageSquare, badge: unreadMessages, end: false },
     {
-      to: session?.user.id ? `/u/${session.profile.username}` : "/login",
+      to: session?.user.id ? `/u/${session.profile.username}` : "/auth",
       label: "Profile",
       icon: User,
       end: false,

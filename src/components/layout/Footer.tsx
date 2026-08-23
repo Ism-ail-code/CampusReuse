@@ -25,8 +25,8 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold">Community</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/signup" className="hover:text-foreground">Join free</Link></li>
-              <li><Link to="/login" className="hover:text-foreground">Sign in</Link></li>
+              <li><Link to="/auth" className="hover:text-foreground">Sign in</Link></li>
+              <li><Link to="/auth" className="hover:text-foreground">Join free</Link></li>
               <li><Link to="/terms" className="hover:text-foreground">Terms of Service</Link></li>
               <li><Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
             </ul>

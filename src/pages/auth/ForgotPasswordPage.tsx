@@ -22,7 +22,7 @@ export function ForgotPasswordPage() {
     const res = await service.resetPassword(email)
     setLoading(false)
     if (res.error) {
-      toast.error(res.error)
+      toast.error("Something went wrong. Please try again.")
       return
     }
     setSent(true)
@@ -32,8 +32,8 @@ export function ForgotPasswordPage() {
     return (
       <AuthShell
         title="Check your email"
-        subtitle="If an account exists for that address, we've sent you a link to reset your password."
-        footer={<Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">Back to sign in</Link>}
+        subtitle="We sent you a password reset link. Check your inbox and spam folder."
+        footer={<Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">Back to log in</Link>}
       >
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
@@ -49,16 +49,16 @@ export function ForgotPasswordPage() {
     <AuthShell
       title="Reset your password"
       subtitle="Enter your email and we'll send you a reset link."
-      footer={<Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">Back to sign in</Link>}
+      footer={<Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">Back to log in</Link>}
     >
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" inputMode="email" />
         </div>
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" size="lg" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Send reset link
+          {loading ? "Sending..." : "Send reset link"}
         </Button>
       </form>
     </AuthShell>

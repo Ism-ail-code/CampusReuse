@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
-import { Check, Loader2, X } from "lucide-react"
+import { Check, Eye, EyeOff, Loader2, X } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +32,7 @@ export function SignupPage() {
   const [usernameState, setUsernameState] = useState<"idle" | "checking" | "available" | "taken">("idle")
   const [email, setEmail] = useState(prefilledEmail)
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [accountType, setAccountType] = useState<"student" | "teacher">("student")
   const [educationLevel, setEducationLevel] = useState("")
   const [customLevel, setCustomLevel] = useState("")
@@ -80,7 +81,14 @@ export function SignupPage() {
     })
     setLoading(false)
     if (res.error) {
-      toast.error(res.error)
+      const msg = res.error.toLowerCase()
+      if (msg.includes("already") && msg.includes("email")) {
+        toast.error("An account with this email already exists. Log in instead.")
+      } else if (msg.includes("already") && msg.includes("username")) {
+        toast.error("This username is already taken. Please choose another.")
+      } else {
+        toast.error(res.error)
+      }
       return
     }
     if (res.needsEmailConfirmation) {
@@ -93,13 +101,13 @@ export function SignupPage() {
 
   return (
     <AuthShell
-      title="Create your account"
-      subtitle="Join your student community and find affordable academic materials."
+      title="Create your CampusReuse account"
+      subtitle="Just a few details to get you started."
       footer={
         <>
           Already have an account?{" "}
           <Link to={`/login?next=${encodeURIComponent(next)}`} className="font-medium text-primary hover:underline">
-            Sign in
+            Log in
           </Link>
         </>
       }
@@ -113,8 +121,15 @@ export function SignupPage() {
         </Tabs>
 
         <div className="space-y-2">
-          <Label htmlFor="displayName">Display name</Label>
-          <Input id="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="e.g. Ayesha Khan" required />
+          <Label htmlFor="displayName">Full name</Label>
+          <Input
+            id="displayName"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="e.g. Ayesha Khan"
+            autoComplete="name"
+            required
+          />
         </div>
 
         <div className="space-y-2">
@@ -133,28 +148,70 @@ export function SignupPage() {
               )}
               required
             />
-            {usernameState === "checking" && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
-            {usernameState === "available" && <Check className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />}
-            {usernameState === "taken" && <X className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-destructive" />}
+            {usernameState === "checking" && (
+              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+            )}
+            {usernameState === "available" && (
+              <Check className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
+            )}
+            {usernameState === "taken" && (
+              <X className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-destructive" />
+            )}
           </div>
-          <p className="text-xs text-muted-foreground">3–30 characters: lowercase letters, numbers, underscores.</p>
-          {usernameState === "taken" && <p className="text-xs text-destructive">This username is already taken.</p>}
+          <p className="text-xs text-muted-foreground">This is the name other users will see. 3–30 characters: lowercase letters, numbers, underscores.</p>
+          {usernameState === "taken" && (
+            <p className="text-xs text-destructive">This username is already taken.</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              inputMode="email"
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+                className="pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="institution">Institution</Label>
-          <InstitutionPicker value={institution} onChange={(i) => { setInstitution(i); setInstitutionError("") }} error={institutionError} />
+          <InstitutionPicker
+            value={institution}
+            onChange={(i) => { setInstitution(i); setInstitutionError("") }}
+            error={institutionError}
+          />
+          <p className="text-xs text-muted-foreground">Helps people find relevant listings.</p>
           {institutionError && <p className="text-xs text-destructive">{institutionError}</p>}
         </div>
 
@@ -188,13 +245,18 @@ export function SignupPage() {
         {educationLevel === "Other" && (
           <div className="space-y-2">
             <Label htmlFor="customLevel">Describe your level</Label>
-            <Input id="customLevel" value={customLevel} onChange={(e) => setCustomLevel(e.target.value)} placeholder="e.g. BS Computer Science Year 2" />
+            <Input
+              id="customLevel"
+              value={customLevel}
+              onChange={(e) => setCustomLevel(e.target.value)}
+              placeholder="e.g. BS Computer Science Year 2"
+            />
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" size="lg" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create account
+          {loading ? "Creating account..." : "Create account"}
         </Button>
 
         <p className="text-center text-xs text-muted-foreground">
