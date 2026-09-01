@@ -58,15 +58,6 @@ export function initials(name: string): string {
     .join("")
 }
 
-export function getErrorMessage(error: unknown, fallback = "Something went wrong."): string {
-  if (typeof error === "string") return error
-  if (error instanceof Error) return error.message
-  if (error && typeof error === "object" && "message" in error) {
-    return String((error as { message: unknown }).message)
-  }
-  return fallback
-}
-
 /** Rewrite a Supabase storage public URL into a resized thumbnail URL. */
 export function thumbUrl(url: string, width = 600): string {
   const m = url.match(/^(.+?)\/storage\/v1\/object\/public\/(.+)$/)
