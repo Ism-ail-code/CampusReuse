@@ -2,13 +2,12 @@ export type AccountType = "student" | "teacher"
 export type UserRole = "user" | "admin" | "moderator"
 export type InstitutionType = "school" | "college" | "university" | "institute" | "other"
 export type ConditionType = "new" | "like_new" | "good" | "used"
-export type TransactionType = "sell" | "exchange" | "give_away"
-export type ListingStatus = "available" | "reserved" | "sold" | "given_away" | "expired"
+export type TransactionType = "sell" | "exchange" | "donate"
+export type ListingStatus = "available" | "reserved" | "sold" | "donated" | "expired"
 export type WantedStatus = "active" | "fulfilled" | "expired"
 export type ProposalStatus = "pending" | "accepted" | "declined" | "cancelled" | "completed"
 export type ReportStatus = "open" | "reviewed" | "dismissed" | "action_taken"
 export type ReportTargetType = "listing" | "user" | "message" | "wanted"
-export type ListingContext = "marketplace" | "get_support"
 export type SupportRequestStatus = "active" | "fulfilled" | "expired" | "cancelled"
 
 export interface Institution {
@@ -68,7 +67,6 @@ export interface Listing {
   condition: ConditionType
   description: string
   transaction_type: TransactionType
-  listing_context: ListingContext
   price: number | null
   exchange_want: string | null
   status: ListingStatus
@@ -173,7 +171,6 @@ export interface ListingFilters {
   education_level?: string | null
   subject?: string | null
   transaction_type?: TransactionType | null
-  listing_context?: ListingContext | null
   condition?: ConditionType | null
   min_price?: number | null
   max_price?: number | null
@@ -230,5 +227,5 @@ export type NotificationType =
   | "wanted_expiring_soon"
   | "wanted_expired"
   | "listing_sold"
-  | "listing_given_away"
+  | "listing_donated"
   | "system"
