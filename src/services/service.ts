@@ -4,6 +4,7 @@ import type {
   ExchangeProposal,
   Institution,
   Listing,
+  ListingContext,
   ListingFilters,
   Message,
   Notification,
@@ -11,6 +12,9 @@ import type {
   Report,
   ReportStatus,
   ReportTargetType,
+  SupportRequest,
+  SupportRequestFilters,
+  SupportRequestInput as SupportRequestInputType,
   UserProfile,
   WantedFilters,
   WantedPost,
@@ -52,8 +56,21 @@ export interface ListingInput {
   condition: Listing["condition"]
   description: string
   transactionType: Listing["transaction_type"]
+  listingContext: ListingContext
   price?: number | null
   exchangeWant?: string | null
+}
+
+export interface SupportRequestInput {
+  title: string
+  categoryId?: number | null
+  subject?: string | null
+  educationLevel?: string | null
+  institutionId?: string | null
+  location?: string | null
+  conditionPref?: Listing["condition"] | null
+  description: string
+  imageUrl?: string | null
 }
 
 export interface WantedInput {
@@ -123,6 +140,16 @@ export interface DataService {
   renewWanted(id: string): Promise<{ error?: string }>
   markWantedFulfilled(id: string): Promise<{ error?: string }>
   respondToWanted(wantedId: string, message: string): Promise<{ id?: string; error?: string }>
+
+  // ---- Support Requests ----
+  listSupportRequests(filters?: SupportRequestFilters): Promise<SupportRequest[]>
+  getSupportRequest(id: string): Promise<SupportRequest | null>
+  getMySupportRequests(): Promise<SupportRequest[]>
+  createSupportRequest(input: SupportRequestInput): Promise<{ id?: string; error?: string }>
+  updateSupportRequest(id: string, input: Partial<SupportRequestInput>): Promise<{ error?: string }>
+  deleteSupportRequest(id: string): Promise<{ error?: string }>
+  markSupportRequestFulfilled(id: string): Promise<{ error?: string }>
+  offerHelp(requestId: string, message: string): Promise<{ id?: string; error?: string }>
 
   // ---- Messaging ----
   getConversations(): Promise<Conversation[]>
