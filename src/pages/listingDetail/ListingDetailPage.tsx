@@ -72,6 +72,7 @@ export function ListingDetailPage() {
       if (l) {
         const sim = await service.listListings({
           category_id: l.category_id,
+          listing_context: l.listing_context ?? "marketplace",
           only_active: true,
           exclude_sold: true,
         })
