@@ -107,6 +107,11 @@ export function ConversationList({ activeId, onSelect }: { activeId?: string; on
                       <ArrowLeftRight className="h-3 w-3 shrink-0" aria-hidden />
                       {truncate(c.last_message_preview || "Wanted post conversation", 60)}
                     </span>
+                  ) : c.wanted_id ? (
+                    <span className="flex items-center gap-1">
+                      <MessageSquare className="h-3 w-3 shrink-0" aria-hidden />
+                      {truncate(c.last_message_preview || "Support request conversation", 60)}
+                    </span>
                   ) : (
                     truncate(c.last_message_preview || "Start a conversation", 60)
                   )}
