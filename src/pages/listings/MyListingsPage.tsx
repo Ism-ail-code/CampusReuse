@@ -142,22 +142,22 @@ export function MyListingsPage() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
-                              {l.transaction_type === "sell" ? "Mark sold" : l.transaction_type === "give_away" ? "Mark given away" : "Mark sold / exchanged"}
+                              {l.transaction_type === "sell" ? "Mark sold" : l.transaction_type === "donate" ? "Mark donated" : "Mark sold / exchanged"}
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="start">
                             <DropdownMenuItem onClick={() => setStatus(l, "sold", "Sold")}>
                               {l.transaction_type === "sell" ? "Sold" : "Sold / exchanged"}
                             </DropdownMenuItem>
-                            {l.transaction_type === "give_away" && (
-                              <DropdownMenuItem onClick={() => setStatus(l, "given_away", "Given away")}>
-                                Given away
+                            {l.transaction_type === "donate" && (
+                              <DropdownMenuItem onClick={() => setStatus(l, "donated", "Donated")}>
+                                Donated
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
-                      {(l.status === "expired" || l.status === "sold" || l.status === "given_away") && (
+                      {(l.status === "expired" || l.status === "sold" || l.status === "donated") && (
                         <Button variant="outline" size="sm" onClick={() => renew(l)}>
                           <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden />
                           Renew / relist

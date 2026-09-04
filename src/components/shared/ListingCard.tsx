@@ -23,7 +23,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
 export function ListingCard({ listing }: { listing: Listing }) {
   const image = listing.images?.[0]?.url ?? null
   const category = getCategory(listing.category_id)
-  const isInactive = listing.status === "sold" || listing.status === "given_away" || listing.status === "expired"
+  const isInactive = listing.status === "sold" || listing.status === "donated" || listing.status === "expired"
 
   return (
     <Link
@@ -40,7 +40,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
         )}
         {isInactive && (
           <span className="absolute inset-x-1 bottom-1 line-clamp-1 rounded-md bg-background/85 px-1.5 py-0.5 text-center text-[10px] font-semibold capitalize text-muted-foreground backdrop-blur-sm">
-            {listing.status === "sold" ? "Sold" : listing.status === "given_away" ? "Given away" : "Expired"}
+            {listing.status === "sold" ? "Sold" : listing.status === "donated" ? "Donated" : "Expired"}
           </span>
         )}
       </div>
@@ -82,7 +82,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
 
 export function ListingCardCompact({ listing, className }: { listing: Listing; className?: string }) {
   const image = listing.images?.[0]?.url ?? null
-  const isInactive = listing.status === "sold" || listing.status === "given_away" || listing.status === "expired"
+  const isInactive = listing.status === "sold" || listing.status === "donated" || listing.status === "expired"
   return (
     <Link
       to={`/listings/${listing.id}`}

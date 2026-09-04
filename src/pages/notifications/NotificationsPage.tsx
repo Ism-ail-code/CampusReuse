@@ -36,7 +36,7 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   wanted_expiring_soon: CalendarClock,
   wanted_expired: Clock,
   listing_sold: Tag,
-  listing_given_away: Gift,
+  listing_donated: Gift,
   system: Bell,
 }
 
