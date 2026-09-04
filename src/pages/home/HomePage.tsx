@@ -3,7 +3,9 @@ import { Link, useNavigate } from "react-router-dom"
 import {
   ArrowRight,
   BookOpen,
+  Gift,
   Handshake,
+  Heart,
   HeartHandshake,
   MessagesSquare,
   Search,
@@ -162,6 +164,57 @@ export function HomePage() {
           <div className="mt-5 text-center">
             <Link to="/wanted" className="text-sm font-medium text-primary hover:underline">
               See all wanted posts →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Get Support */}
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-6 sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-xl font-bold text-foreground">
+                <Heart className="h-5 w-5 text-rose-500" aria-hidden />
+                Get Support
+              </h2>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Free educational resources shared by the community. Request what you need.
+              </p>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/support">Browse resources</Link>
+            </Button>
+          </div>
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Link
+              to="/support"
+              className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-shadow hover:shadow-card"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <Gift className="h-5 w-5" aria-hidden />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Available Resources</p>
+                <p className="text-xs text-muted-foreground">Free books, notes, and educational materials</p>
+              </div>
+            </Link>
+            <Link
+              to="/support"
+              className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-shadow hover:shadow-card"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <Search className="h-5 w-5" aria-hidden />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Student Requests</p>
+                <p className="text-xs text-muted-foreground">Find items students need help with</p>
+              </div>
+            </Link>
+          </div>
+          <div className="mt-5 text-center">
+            <Link to="/support" className="text-sm font-medium text-primary hover:underline">
+              Explore Get Support →
             </Link>
           </div>
         </div>
