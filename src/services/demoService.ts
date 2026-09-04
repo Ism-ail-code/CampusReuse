@@ -13,6 +13,8 @@ import type {
   Report,
   ReportStatus,
   ReportTargetType,
+  SupportRequest,
+  SupportRequestFilters,
   UserProfile,
   WantedFilters,
   WantedPost,
@@ -26,6 +28,7 @@ import type {
   InstitutionRequestInput,
   ListingInput,
   SignupData,
+  SupportRequestInput,
   Unsubscribe,
   WantedInput,
 } from "./service"
@@ -84,6 +87,7 @@ interface DemoDB {
   reports: Report[]
   blocks: Block[]
   institutionRequests: InstitutionRequest[]
+  supportRequests: SupportRequest[]
   authPasswords: Record<string, string>
 }
 
@@ -171,6 +175,7 @@ function buildSeed(): DemoDB {
     status: Listing["status"],
     createdDaysAgo: number,
     expiresInDays: number,
+    listingContext: Listing["listing_context"] = "marketplace",
   ): Listing => ({
     id,
     seller_id: seller.id,
@@ -181,6 +186,7 @@ function buildSeed(): DemoDB {
     condition,
     description,
     transaction_type: transactionType,
+    listing_context: listingContext,
     price,
     exchange_want: exchangeWant,
     status,
@@ -203,6 +209,10 @@ function buildSeed(): DemoDB {
     listing("l_210", u.ayesha, "Data Structures & Algorithms in Java (2nd ed)", 1, "Computer Science", "BS CS Year 2", "good", "Core course book. Slight cover wear, inside clean.", "sell", 1500, null, "expired", 35, -2),
     listing("l_211", u.fatima, "Physics Practical Notebook (Class 9)", 5, "Physics", "Grade 9", "like_new", "Completed practical notebook, teacher-checked.", "exchange", null, "Chemistry practical notebook", "available", 7, 15),
     listing("l_212", u.zara, "Computer Science Class 9 Guide", 3, "Computer Science", "Grade 9", "good", "In good condition, no missing pages.", "sell", 350, null, "available", 0, 24),
+    // Get Support donations
+    listing("l_301", u.ayesha, "Free Class 11 Physics Notes (complete semester)", 2, "Physics", "Grade 11", "good", "Complete physics notes from semester 1 and 2. Free for any student who needs them.", "give_away", null, null, "available", 3, 27, "get_support"),
+    listing("l_302", u.mrshah, "Oxford Dictionary — donated for student use", 6, null, "General", "like_new", "Donated by teacher. Any student can pick it up.", "give_away", null, null, "available", 5, 25, "get_support"),
+    listing("l_303", u.daniyal, "Scientific Calculator — free for students in need", 4, null, "BS Physics Year 3", "good", "I upgraded my calculator. This one works perfectly. Free for anyone who needs it.", "give_away", null, null, "available", 2, 28, "get_support"),
   ]
 
   const listingImages: ListingImage[] = listings
@@ -278,6 +288,45 @@ function buildSeed(): DemoDB {
       updated_at: daysAgo(27),
       expires_at: daysFromNow(3),
       author: u.ayesha,
+    },
+  ]
+
+  const supportRequests: SupportRequest[] = [
+    {
+      id: "sr_1",
+      user_id: u.bilal.id,
+      title: "Looking for Class 11 Physics textbook",
+      description: "I need a Physics textbook for my board exams. Any board is fine as long as the content is complete.",
+      category_id: 1,
+      subject: "Physics",
+      education_level: "Grade 11",
+      institution_id: null,
+      location: "Lahore",
+      condition_pref: "good",
+      image_url: null,
+      status: "active",
+      created_at: daysAgo(3),
+      updated_at: daysAgo(3),
+      expires_at: daysFromNow(27),
+      author: u.bilal,
+    },
+    {
+      id: "sr_2",
+      user_id: u.zara.id,
+      title: "Need a scientific calculator for exams",
+      description: "Looking for a Casio scientific calculator for my upcoming exams. Can't afford a new one right now.",
+      category_id: 4,
+      subject: null,
+      education_level: "Grade 10",
+      institution_id: null,
+      location: "Islamabad",
+      condition_pref: "good",
+      image_url: null,
+      status: "active",
+      created_at: daysAgo(1),
+      updated_at: daysAgo(1),
+      expires_at: daysFromNow(29),
+      author: u.zara,
     },
   ]
 
@@ -361,6 +410,7 @@ function buildSeed(): DemoDB {
     reports,
     blocks: [],
     institutionRequests,
+    supportRequests,
     authPasswords: {
       "demo@campusreuse.app": "DemoPass123!",
       "admin@campusreuse.app": "AdminPass123!",
@@ -700,6 +750,9 @@ export class DemoService implements DataService {
 
   async listListings(filters: ListingFilters = {}): Promise<Listing[]> {
     let rows = [...this.db.listings]
+    // Filter by listing_context - default to 'marketplace' for backward compatibility
+    const context = filters.listing_context ?? "marketplace"
+    rows = rows.filter((l) => (l.listing_context ?? "marketplace") === context)
     const statuses = filters.status ?? (filters.only_active ? ["available", "reserved"] : undefined)
     if (statuses?.length) rows = rows.filter((l) => statuses.includes(l.status))
     if (filters.exclude_sold) rows = rows.filter((l) => l.status !== "sold" && l.status !== "given_away")
@@ -743,6 +796,7 @@ export class DemoService implements DataService {
       condition: input.condition,
       description: input.description,
       transaction_type: input.transactionType,
+      listing_context: input.listingContext ?? "marketplace",
       price: input.transactionType === "sell" ? input.price ?? null : null,
       exchange_want: input.transactionType === "exchange" ? input.exchangeWant ?? null : null,
       status: "available",
@@ -778,6 +832,9 @@ export class DemoService implements DataService {
       l.transaction_type = input.transactionType
       l.price = input.transactionType === "sell" ? input.price ?? null : null
       l.exchange_want = input.transactionType === "exchange" ? input.exchangeWant ?? null : null
+    }
+    if (input.listingContext !== undefined) {
+      l.listing_context = input.listingContext
     }
     l.updated_at = nowIso()
     if (images && images.length) {
@@ -996,6 +1053,129 @@ export class DemoService implements DataService {
     })
     this.notify(w.user_id, "wanted_response", "Response to your wanted post", `Someone responded to your wanted post "${w.title}".`, `/messages/${conv.id}`, wantedId)
 
+    this.persist()
+    this.emitConversations()
+    this.emitNotifications()
+    return { id: conv.id }
+  }
+
+  // ==========================================================================
+  // Support Requests
+  // ==========================================================================
+
+  async listSupportRequests(filters: SupportRequestFilters = {}): Promise<SupportRequest[]> {
+    let rows = [...this.db.supportRequests]
+    const statuses = filters.status ?? ["active"]
+    rows = rows.filter((r) => statuses.includes(r.status as SupportRequest["status"]))
+    if (filters.query) {
+      const q = filters.query.trim().toLowerCase()
+      rows = rows.filter((r) => `${r.title} ${r.subject ?? ""} ${r.description}`.toLowerCase().includes(q))
+    }
+    if (filters.category_id) rows = rows.filter((r) => r.category_id === filters.category_id)
+    if (filters.institution_id) rows = rows.filter((r) => r.institution_id === filters.institution_id)
+    return rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 60)
+  }
+
+  async getSupportRequest(id: string): Promise<SupportRequest | null> {
+    return this.db.supportRequests.find((r) => r.id === id) ?? null
+  }
+
+  async getMySupportRequests(): Promise<SupportRequest[]> {
+    if (!this.sessionUserId) return []
+    return this.db.supportRequests
+      .filter((r) => r.user_id === this.sessionUserId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  }
+
+  async createSupportRequest(input: SupportRequestInput): Promise<{ id?: string; error?: string }> {
+    if (!this.sessionUserId) return { error: "Not authenticated." }
+    const sr: SupportRequest = {
+      id: uid("sr"),
+      user_id: this.sessionUserId,
+      title: input.title,
+      description: input.description,
+      category_id: input.categoryId ?? null,
+      subject: input.subject ?? null,
+      education_level: input.educationLevel ?? null,
+      institution_id: input.institutionId ?? null,
+      location: input.location ?? null,
+      condition_pref: input.conditionPref ?? null,
+      image_url: input.imageUrl ?? null,
+      status: "active",
+      created_at: nowIso(),
+      updated_at: nowIso(),
+      expires_at: daysFromNow(WANTED_TTL_DAYS),
+      author: this.currentProfile,
+      category: input.categoryId ? this.db.categories.find((c) => c.id === input.categoryId) ?? null : null,
+    }
+    this.db.supportRequests.unshift(sr)
+    this.persist()
+    return { id: sr.id }
+  }
+
+  async updateSupportRequest(id: string, input: Partial<SupportRequestInput>): Promise<{ error?: string }> {
+    const sr = this.db.supportRequests.find((r) => r.id === id)
+    if (!sr) return { error: "Support request not found." }
+    if (input.title !== undefined) sr.title = input.title
+    if (input.description !== undefined) sr.description = input.description
+    if (input.categoryId !== undefined) sr.category_id = input.categoryId ?? null
+    if (input.subject !== undefined) sr.subject = input.subject ?? null
+    if (input.educationLevel !== undefined) sr.education_level = input.educationLevel ?? null
+    if (input.institutionId !== undefined) sr.institution_id = input.institutionId ?? null
+    if (input.location !== undefined) sr.location = input.location ?? null
+    if (input.conditionPref !== undefined) sr.condition_pref = input.conditionPref ?? null
+    if (input.imageUrl !== undefined) sr.image_url = input.imageUrl ?? null
+    sr.updated_at = nowIso()
+    this.persist()
+    return {}
+  }
+
+  async deleteSupportRequest(id: string): Promise<{ error?: string }> {
+    this.db.supportRequests = this.db.supportRequests.filter((r) => r.id !== id)
+    this.persist()
+    return {}
+  }
+
+  async markSupportRequestFulfilled(id: string): Promise<{ error?: string }> {
+    const sr = this.db.supportRequests.find((r) => r.id === id)
+    if (!sr) return { error: "Support request not found." }
+    sr.status = "fulfilled"
+    sr.updated_at = nowIso()
+    this.persist()
+    return {}
+  }
+
+  async offerHelp(requestId: string, message: string): Promise<{ id?: string; error?: string }> {
+    if (!this.sessionUserId) return { error: "Not authenticated." }
+    const sr = this.db.supportRequests.find((r) => r.id === requestId)
+    if (!sr) return { error: "Support request not found." }
+    if (sr.user_id === this.sessionUserId) return { error: "You cannot offer help on your own request." }
+    if (this.isBlockedPair(this.sessionUserId, sr.user_id)) return { error: "Messaging is not available with this user." }
+
+    // Check for existing conversation
+    let conv = this.db.conversations.find((c) => c.wanted_id === requestId && this.db.participants.some((p) => p.conversation_id === c.id && p.user_id === this.sessionUserId) && this.db.participants.some((p) => p.conversation_id === c.id && p.user_id === sr.user_id))
+
+    if (!conv) {
+      conv = { id: uid("c"), listing_id: null, wanted_id: requestId, last_message_at: nowIso(), last_message_preview: message.trim().slice(0, 100), created_at: nowIso(), updated_at: nowIso() }
+      this.db.conversations.unshift(conv)
+      this.db.participants.push(
+        { conversation_id: conv.id, user_id: this.sessionUserId, last_read_at: nowIso() },
+        { conversation_id: conv.id, user_id: sr.user_id, last_read_at: daysAgo(1) },
+      )
+    }
+
+    this.db.messages.push({
+      id: uid("m"),
+      conversation_id: conv.id,
+      sender_id: this.sessionUserId,
+      body: message.trim(),
+      created_at: nowIso(),
+    })
+    conv.last_message_at = nowIso()
+    conv.last_message_preview = message.trim().slice(0, 100)
+    conv.updated_at = nowIso()
+
+    this.notify(sr.user_id, "wanted_response", "Someone wants to help!", `A student offered to help with your request.`, `/messages/${conv.id}`, requestId)
     this.persist()
     this.emitConversations()
     this.emitNotifications()
