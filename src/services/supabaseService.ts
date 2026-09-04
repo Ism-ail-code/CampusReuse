@@ -10,6 +10,8 @@ import type {
   Notification,
   PrivateDetails,
   Report,
+  SupportRequest,
+  SupportRequestFilters,
   UserProfile,
   WantedFilters,
   WantedPost,
@@ -20,6 +22,7 @@ import type {
   InstitutionRequestInput,
   ListingInput,
   SignupData,
+  SupportRequestInput,
   Unsubscribe,
   WantedInput,
 } from "./service"
@@ -300,6 +303,10 @@ class SupabaseService implements DataService {
       .from("listings")
       .select("*, seller:profiles!listings_seller_id_fkey(*, institution:institutions(*)), images:listing_images(*), category:categories(*)")
 
+    // Filter by listing_context - default to 'marketplace' for backward compatibility
+    const context = filters.listing_context ?? "marketplace"
+    q = q.eq("listing_context", context)
+
     if (filters.query) {
       const term = `%${filters.query.trim()}%`
       q = q.or(`title.ilike.${term},subject.ilike.${term},description.ilike.${term}`)
@@ -364,6 +371,7 @@ class SupabaseService implements DataService {
         condition: input.condition,
         description: input.description,
         transaction_type: input.transactionType,
+        listing_context: input.listingContext ?? "marketplace",
         price: input.transactionType === "sell" ? input.price : null,
         exchange_want: input.transactionType === "exchange" ? input.exchangeWant : null,
       })
@@ -391,10 +399,13 @@ class SupabaseService implements DataService {
     if (input.educationLevel !== undefined) patch.education_level = input.educationLevel ?? null
     if (input.condition !== undefined) patch.condition = input.condition
     if (input.description !== undefined) patch.description = input.description
-    if (input.transactionType !== undefined) patch.transaction_type = input.transactionType
     if (input.transactionType !== undefined) {
+      patch.transaction_type = input.transactionType
       patch.price = input.transactionType === "sell" ? input.price ?? null : null
       patch.exchange_want = input.transactionType === "exchange" ? input.exchangeWant ?? null : null
+    }
+    if (input.listingContext !== undefined) {
+      patch.listing_context = input.listingContext
     }
     const { error } = await supabase.from("listings").update(patch).eq("id", id)
     if (error) return { error: mapError(error, "Could not update listing.") }
@@ -603,6 +614,185 @@ class SupabaseService implements DataService {
     })
     if (error) return { error: mapError(error, "Could not respond to this post.") }
     return { id: data as string }
+  }
+
+  // ==========================================================================
+  // Support Requests
+  // ==========================================================================
+
+  async listSupportRequests(filters: SupportRequestFilters = {}): Promise<SupportRequest[]> {
+    if (!supabase) return []
+    let q = supabase
+      .from("support_requests")
+      .select("*, author:profiles!support_requests_user_id_fkey(*, institution:institutions(*)), category:categories(*), institution:institutions(*)")
+
+    if (filters.query) {
+      const term = `%${filters.query.trim()}%`
+      q = q.or(`title.ilike.${term},description.ilike.${term},subject.ilike.${term}`)
+    }
+    if (filters.category_id) q = q.eq("category_id", filters.category_id)
+    if (filters.institution_id) q = q.eq("institution_id", filters.institution_id)
+    const statuses = filters.status ?? ["active"]
+    q = q.in("status", statuses as string[])
+    q = q.order("created_at", { ascending: false }).limit(60)
+
+    const { data, error } = await q
+    if (error || !data) return []
+    return data as SupportRequest[]
+  }
+
+  async getSupportRequest(id: string): Promise<SupportRequest | null> {
+    if (!supabase) return null
+    const { data, error } = await supabase
+      .from("support_requests")
+      .select("*, author:profiles!support_requests_user_id_fkey(*, institution:institutions(*)), category:categories(*), institution:institutions(*)")
+      .eq("id", id)
+      .maybeSingle()
+    if (error || !data) return null
+    return data as SupportRequest
+  }
+
+  async getMySupportRequests(): Promise<SupportRequest[]> {
+    if (!supabase) return []
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return []
+    const { data: rows } = await supabase
+      .from("support_requests")
+      .select("*, category:categories(*), institution:institutions(*)")
+      .eq("user_id", data.user.id)
+      .order("created_at", { ascending: false })
+    return (rows ?? []) as SupportRequest[]
+  }
+
+  async createSupportRequest(input: SupportRequestInput): Promise<{ id?: string; error?: string }> {
+    if (!supabase) return { error: "Supabase not configured" }
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return { error: "Not authenticated." }
+    const { data: row, error } = await supabase
+      .from("support_requests")
+      .insert({
+        user_id: data.user.id,
+        title: input.title,
+        description: input.description,
+        category_id: input.categoryId ?? null,
+        subject: input.subject ?? null,
+        education_level: input.educationLevel ?? null,
+        institution_id: input.institutionId ?? null,
+        location: input.location ?? null,
+        condition_pref: input.conditionPref ?? null,
+        image_url: input.imageUrl ?? null,
+      })
+      .select("id")
+      .single()
+    if (error || !row) return { error: mapError(error, "Could not create support request.") }
+    return { id: row.id }
+  }
+
+  async updateSupportRequest(id: string, input: Partial<SupportRequestInput>): Promise<{ error?: string }> {
+    if (!supabase) return { error: "Supabase not configured" }
+    const patch: Record<string, unknown> = {}
+    if (input.title !== undefined) patch.title = input.title
+    if (input.description !== undefined) patch.description = input.description
+    if (input.categoryId !== undefined) patch.category_id = input.categoryId ?? null
+    if (input.subject !== undefined) patch.subject = input.subject ?? null
+    if (input.educationLevel !== undefined) patch.education_level = input.educationLevel ?? null
+    if (input.institutionId !== undefined) patch.institution_id = input.institutionId ?? null
+    if (input.location !== undefined) patch.location = input.location ?? null
+    if (input.conditionPref !== undefined) patch.condition_pref = input.conditionPref ?? null
+    if (input.imageUrl !== undefined) patch.image_url = input.imageUrl ?? null
+    const { error } = await supabase.from("support_requests").update(patch).eq("id", id)
+    if (error) return { error: mapError(error, "Could not update support request.") }
+    return {}
+  }
+
+  async deleteSupportRequest(id: string): Promise<{ error?: string }> {
+    if (!supabase) return { error: "Supabase not configured" }
+    const { error } = await supabase.from("support_requests").delete().eq("id", id)
+    if (error) return { error: mapError(error, "Could not delete support request.") }
+    return {}
+  }
+
+  async markSupportRequestFulfilled(id: string): Promise<{ error?: string }> {
+    if (!supabase) return { error: "Supabase not configured" }
+    const { error } = await supabase.from("support_requests").update({ status: "fulfilled" }).eq("id", id)
+    if (error) return { error: mapError(error, "Could not update support request.") }
+    return {}
+  }
+
+  async offerHelp(requestId: string, message: string): Promise<{ id?: string; error?: string }> {
+    if (!supabase) return { error: "Supabase not configured" }
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return { error: "Not authenticated." }
+
+    // Get the support request to find the author
+    const { data: request } = await supabase
+      .from("support_requests")
+      .select("user_id")
+      .eq("id", requestId)
+      .single()
+    if (!request) return { error: "Support request not found." }
+    if (request.user_id === data.user.id) return { error: "You cannot offer help on your own request." }
+
+    // Check for existing conversation between the two users about this request
+    const { data: existingConvo } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("wanted_id", requestId)
+      .single()
+
+    if (existingConvo) {
+      // Send message to existing conversation
+      const { error: msgError } = await supabase.from("messages").insert({
+        conversation_id: existingConvo.id,
+        sender_id: data.user.id,
+        body: message.trim(),
+      })
+      if (msgError) return { error: mapError(msgError, "Could not send message.") }
+      await supabase
+        .from("conversations")
+        .update({ last_message_at: new Date().toISOString(), last_message_preview: message.trim().slice(0, 100) })
+        .eq("id", existingConvo.id)
+      return { id: existingConvo.id }
+    }
+
+    // Create new conversation linked to the support request (reuse wanted_id)
+    const { data: convo, error: convoError } = await supabase
+      .from("conversations")
+      .insert({ wanted_id: requestId })
+      .select("id")
+      .single()
+    if (convoError || !convo) return { error: mapError(convoError, "Could not start conversation.") }
+
+    // Add participants
+    await supabase.from("conversation_participants").insert([
+      { conversation_id: convo.id, user_id: data.user.id },
+      { conversation_id: convo.id, user_id: request.user_id },
+    ])
+
+    // Send initial message
+    const { error: msgError } = await supabase.from("messages").insert({
+      conversation_id: convo.id,
+      sender_id: data.user.id,
+      body: message.trim(),
+    })
+    if (msgError) return { error: mapError(msgError, "Could not send message.") }
+
+    await supabase
+      .from("conversations")
+      .update({ last_message_at: new Date().toISOString(), last_message_preview: message.trim().slice(0, 100) })
+      .eq("id", convo.id)
+
+    // Notify the support request author
+    await supabase.rpc("notify_user", {
+      p_user_id: request.user_id,
+      p_type: "wanted_response",
+      p_title: "Someone wants to help!",
+      p_body: `A student offered to help with your request.`,
+      p_link: `/messages/${convo.id}`,
+      p_ref_id: requestId,
+    })
+
+    return { id: convo.id }
   }
 
   // ==========================================================================
