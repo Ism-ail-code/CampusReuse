@@ -11,7 +11,7 @@ export function CreateListingPage() {
   const [params] = useSearchParams()
   const [submitting, setSubmitting] = useState(false)
   const contextParam = params.get("context")
-  const initialContext = contextParam === "get_support" ? "get_support" : "marketplace"
+  const initialTransactionType = contextParam === "get_support" ? "donate" : "sell"
 
   const submit = async (values: ListingFormValues, files: File[]) => {
     setSubmitting(true)
@@ -23,8 +23,7 @@ export function CreateListingPage() {
         educationLevel: values.educationLevel || null,
         condition: values.condition as never,
         description: values.description,
-        listingContext: values.listingContext,
-        transactionType: values.listingContext === "get_support" ? "give_away" : values.transactionType,
+        transactionType: values.transactionType,
         price: values.transactionType === "sell" ? Number(values.price) || 0 : null,
         exchangeWant: values.transactionType === "exchange" ? values.exchangeWant : null,
       },
@@ -35,7 +34,7 @@ export function CreateListingPage() {
       toast.error(res.error)
       return
     }
-    if (values.listingContext === "get_support") {
+    if (values.transactionType === "donate") {
       toast.success("Your donation is live in Get Support!")
       navigate("/support")
     } else {
@@ -48,12 +47,12 @@ export function CreateListingPage() {
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
       <PageHeader
         title="List an item"
-        subtitle="Sell, exchange, or give away an academic material you no longer need. Takes just a few minutes."
-        backTo={initialContext === "get_support" ? "/support" : "/"}
+        subtitle="Sell, exchange, or donate an academic material you no longer need. Takes just a few minutes."
+        backTo={initialTransactionType === "donate" ? "/support" : "/"}
       />
       <div className="mt-6 rounded-xl border bg-card p-6 shadow-subtle">
         <ListingForm
-          initial={{ listingContext: initialContext }}
+          initial={{ transactionType: initialTransactionType }}
           onSubmit={submit}
           submitting={submitting}
         />
