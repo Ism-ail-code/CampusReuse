@@ -60,9 +60,9 @@ export const TRANSACTION_TYPES: {
     description: "Swap it for something you need.",
   },
   {
-    value: "give_away",
-    label: "Give Away",
-    description: "Pass it on for free to someone who needs it.",
+    value: "donate",
+    label: "Donate",
+    description: "Give educational resources to students in need.",
   },
 ]
 
@@ -78,7 +78,7 @@ export const LISTING_STATUSES: {
   { value: "available", label: "Available", className: "bg-emerald-100 text-emerald-700" },
   { value: "reserved", label: "Reserved", className: "bg-amber-100 text-amber-700" },
   { value: "sold", label: "Sold", className: "bg-slate-200 text-slate-600" },
-  { value: "given_away", label: "Given Away", className: "bg-sky-100 text-sky-700" },
+  { value: "donated", label: "Donated", className: "bg-sky-100 text-sky-700" },
   { value: "expired", label: "Expired", className: "bg-slate-200 text-slate-500" },
 ]
 
