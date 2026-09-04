@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { Bell, Home, MessageSquare, PlusCircle, Search, User } from "lucide-react"
+import { Bell, Heart, Home, MessageSquare, PlusCircle, Search, User } from "lucide-react"
 import { useApp } from "@/app/AppContext"
 import { cn } from "@/lib/utils"
 
@@ -9,7 +9,7 @@ export function MobileNav() {
   const items = [
     { to: "/", label: "Home", icon: Home, end: true },
     { to: "/browse", label: "Browse", icon: Search, end: false },
-    { to: "/wanted", label: "Wanted", icon: Bell, end: false },
+    { to: "/support", label: "Support", icon: Heart, end: false },
     ...(session?.user.id ? [{ to: "/listings/new", label: "Sell", icon: PlusCircle, end: false }] : []),
     { to: "/messages", label: "Messages", icon: MessageSquare, badge: unreadMessages, end: false },
     {
