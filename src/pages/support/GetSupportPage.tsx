@@ -22,7 +22,7 @@ export function GetSupportPage() {
     ;(async () => {
       setLoading(true)
       const [d, sr] = await Promise.all([
-        service.listListings({ listing_context: "get_support", only_active: true }),
+        service.listListings({ transaction_type: "donate", only_active: true }),
         service.listSupportRequests({ status: ["active"] }),
       ])
       if (!mounted) return
