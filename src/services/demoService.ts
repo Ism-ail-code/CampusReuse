@@ -175,7 +175,6 @@ function buildSeed(): DemoDB {
     status: Listing["status"],
     createdDaysAgo: number,
     expiresInDays: number,
-    listingContext: Listing["listing_context"] = "marketplace",
   ): Listing => ({
     id,
     seller_id: seller.id,
@@ -186,7 +185,6 @@ function buildSeed(): DemoDB {
     condition,
     description,
     transaction_type: transactionType,
-    listing_context: listingContext,
     price,
     exchange_want: exchangeWant,
     status,
@@ -200,9 +198,9 @@ function buildSeed(): DemoDB {
     listing("l_201", u.ayesha, "Punjab Board Class 11 Physics Textbook (Part 1 & 2)", 1, "Physics", "Grade 11", "good", "Punjab Textbook Board edition. Minor pencil underlining in two chapters, all pages intact.", "sell", 800, null, "available", 8, 12),
     listing("l_202", u.ayesha, "Chemistry Part 1 & 2 — Federal Board Class 11", 1, "Chemistry", "Grade 11", "like_new", "Hardly used. Looking for Class 11 Mathematics in exchange.", "exchange", null, "Class 11 Mathematics textbook (any board)", "available", 10, 20),
     listing("l_203", u.bilal, "Class 10 Maths Key Book / Solved Guide", 3, "Mathematics", "Grade 10", "good", "Step-by-step solutions. A few margin notes. Great for boards prep.", "sell", 450, null, "available", 3, 25),
-    listing("l_204", u.fatima, "Class 9 Biology Complete Notes (handwritten, 120 pages)", 2, "Biology", "Grade 9", "used", "Complete handwritten notes covering all chapters with diagrams.", "give_away", null, null, "given_away", 20, -5),
+    listing("l_204", u.fatima, "Class 9 Biology Complete Notes (handwritten, 120 pages)", 2, "Biology", "Grade 9", "used", "Complete handwritten notes covering all chapters with diagrams.", "donate", null, null, "available", 20, 25),
     listing("l_205", u.daniyal, "Casio fx-991EX ClassWiz Scientific Calculator", 4, null, "BS Physics Year 3", "like_new", "Used for one semester of labs. Original box and manual included.", "sell", 5000, null, "available", 5, 18),
-    listing("l_206", u.zara, "English Literature Guide — Class 10", 3, "English", "Grade 10", "good", "Punjab board. Some highlighting in the poetry section.", "give_away", null, null, "available", 1, 28),
+    listing("l_206", u.zara, "English Literature Guide — Class 10", 3, "English", "Grade 10", "good", "Punjab board. Some highlighting in the poetry section.", "donate", null, null, "available", 1, 28),
     listing("l_207", u.mrshah, "Oxford English Grammar Course (Advanced) — unused", 1, "English", "Teacher resource", "new", "Brand new, never opened. Great for O/A level teaching.", "sell", 2200, null, "available", 6, 22),
     listing("l_208", u.daniyal, "Calculus Early Transcendentals — swap for Linear Algebra", 1, "Mathematics", "BS Year 1", "used", "Well used but complete. Looking to swap for Linear Algebra.", "exchange", null, "Linear Algebra textbook", "available", 4, 30),
     listing("l_209", u.bilal, "Pack of 5 A4 Notebooks (unused)", 5, null, "Grade 11", "new", "Unused notebooks from a bulk pack.", "sell", 500, null, "reserved", 2, 9),
@@ -210,9 +208,9 @@ function buildSeed(): DemoDB {
     listing("l_211", u.fatima, "Physics Practical Notebook (Class 9)", 5, "Physics", "Grade 9", "like_new", "Completed practical notebook, teacher-checked.", "exchange", null, "Chemistry practical notebook", "available", 7, 15),
     listing("l_212", u.zara, "Computer Science Class 9 Guide", 3, "Computer Science", "Grade 9", "good", "In good condition, no missing pages.", "sell", 350, null, "available", 0, 24),
     // Get Support donations
-    listing("l_301", u.ayesha, "Free Class 11 Physics Notes (complete semester)", 2, "Physics", "Grade 11", "good", "Complete physics notes from semester 1 and 2. Free for any student who needs them.", "give_away", null, null, "available", 3, 27, "get_support"),
-    listing("l_302", u.mrshah, "Oxford Dictionary — donated for student use", 6, null, "General", "like_new", "Donated by teacher. Any student can pick it up.", "give_away", null, null, "available", 5, 25, "get_support"),
-    listing("l_303", u.daniyal, "Scientific Calculator — free for students in need", 4, null, "BS Physics Year 3", "good", "I upgraded my calculator. This one works perfectly. Free for anyone who needs it.", "give_away", null, null, "available", 2, 28, "get_support"),
+    listing("l_301", u.ayesha, "Free Class 11 Physics Notes (complete semester)", 2, "Physics", "Grade 11", "good", "Complete physics notes from semester 1 and 2. Free for any student who needs them.", "donate", null, null, "available", 3, 27),
+    listing("l_302", u.mrshah, "Oxford Dictionary — donated for student use", 6, null, "General", "like_new", "Donated by teacher. Any student can pick it up.", "donate", null, null, "available", 5, 25),
+    listing("l_303", u.daniyal, "Scientific Calculator — free for students in need", 4, null, "BS Physics Year 3", "good", "I upgraded my calculator. This one works perfectly. Free for anyone who needs it.", "donate", null, null, "available", 2, 28),
   ]
 
   const listingImages: ListingImage[] = listings
@@ -750,12 +748,9 @@ export class DemoService implements DataService {
 
   async listListings(filters: ListingFilters = {}): Promise<Listing[]> {
     let rows = [...this.db.listings]
-    // Filter by listing_context - default to 'marketplace' for backward compatibility
-    const context = filters.listing_context ?? "marketplace"
-    rows = rows.filter((l) => (l.listing_context ?? "marketplace") === context)
     const statuses = filters.status ?? (filters.only_active ? ["available", "reserved"] : undefined)
     if (statuses?.length) rows = rows.filter((l) => statuses.includes(l.status))
-    if (filters.exclude_sold) rows = rows.filter((l) => l.status !== "sold" && l.status !== "given_away")
+    if (filters.exclude_sold) rows = rows.filter((l) => l.status !== "sold" && l.status !== "donated")
     if (filters.query) {
       const q = filters.query.trim().toLowerCase()
       rows = rows.filter((l) => this.listingSearchable(l).includes(q))
@@ -796,7 +791,6 @@ export class DemoService implements DataService {
       condition: input.condition,
       description: input.description,
       transaction_type: input.transactionType,
-      listing_context: input.listingContext ?? "marketplace",
       price: input.transactionType === "sell" ? input.price ?? null : null,
       exchange_want: input.transactionType === "exchange" ? input.exchangeWant ?? null : null,
       status: "available",
@@ -833,9 +827,6 @@ export class DemoService implements DataService {
       l.price = input.transactionType === "sell" ? input.price ?? null : null
       l.exchange_want = input.transactionType === "exchange" ? input.exchangeWant ?? null : null
     }
-    if (input.listingContext !== undefined) {
-      l.listing_context = input.listingContext
-    }
     l.updated_at = nowIso()
     if (images && images.length) {
       const urls = await Promise.all(images.map((f) => fileToDataUrl(f)))
@@ -870,8 +861,8 @@ export class DemoService implements DataService {
     if (status === "sold") {
       this.notify(l.seller_id, "listing_sold", "Your listing was marked as sold", `"${l.title}" was marked as sold.`, "/my-listings", id)
     }
-    if (status === "given_away") {
-      this.notify(l.seller_id, "listing_given_away", "Your listing was marked as given away", `"${l.title}" was marked as given away.`, "/my-listings", id)
+    if (status === "donated") {
+      this.notify(l.seller_id, "listing_donated", "Your listing was marked as donated", `"${l.title}" was marked as donated.`, "/my-listings", id)
     }
     this.persist()
     return {}
