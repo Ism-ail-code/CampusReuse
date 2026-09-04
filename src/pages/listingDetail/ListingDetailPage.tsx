@@ -72,7 +72,7 @@ export function ListingDetailPage() {
       if (l) {
         const sim = await service.listListings({
           category_id: l.category_id,
-          listing_context: l.listing_context ?? "marketplace",
+          transaction_type: l.transaction_type,
           only_active: true,
           exclude_sold: true,
         })
@@ -302,7 +302,7 @@ export function ListingDetailPage() {
           <div className="flex flex-wrap items-center gap-2">
             <TransactionBadge type={listing.transaction_type} />
             <StatusBadge status={listing.status} />
-            {listing.listing_context === "get_support" && (
+            {listing.transaction_type === "donate" && (
               <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
                 <Gift className="h-3 w-3" aria-hidden />
                 Get Support
@@ -317,10 +317,10 @@ export function ListingDetailPage() {
             {listing.transaction_type === "sell" && listing.price != null && (
               <p className="text-3xl font-bold text-foreground">{formatCurrency(listing.price)}</p>
             )}
-            {listing.transaction_type === "give_away" && (
+            {listing.transaction_type === "donate" && (
               <p className="flex items-center gap-2 text-xl font-semibold text-emerald-600">
                 <Gift className="h-5 w-5" aria-hidden />
-                {listing.listing_context === "get_support" ? "Free — Donation" : "Free — give away"}
+                Free — Donation
               </p>
             )}
             {listing.transaction_type === "exchange" && (
@@ -407,7 +407,7 @@ export function ListingDetailPage() {
                   {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" aria-hidden />}
                   {listing.status === "sold"
                     ? "Listing sold"
-                    : listing.status === "given_away"
+                    : listing.status === "donated"
                       ? "Given away"
                       : listing.status === "expired"
                         ? "Listing expired"
@@ -428,11 +428,11 @@ export function ListingDetailPage() {
                   </Link>
                 </Button>
                 {isAvailable && (
-                  <Button variant="outline" size="sm" onClick={() => setStatus(listing.transaction_type === "give_away" ? "given_away" : "sold", listing.transaction_type === "give_away" ? "given away" : "sold")} disabled={busy}>
-                    Mark {listing.transaction_type === "give_away" ? "given away" : "sold"}
+                  <Button variant="outline" size="sm" onClick={() => setStatus(listing.transaction_type === "donate" ? "donated" : "sold", listing.transaction_type === "donate" ? "donated" : "sold")} disabled={busy}>
+                    Mark {listing.transaction_type === "donate" ? "donated" : "sold"}
                   </Button>
                 )}
-                {(listing.status === "expired" || listing.status === "sold" || listing.status === "given_away") && (
+                {(listing.status === "expired" || listing.status === "sold" || listing.status === "donated") && (
                   <Button variant="outline" size="sm" onClick={renew} disabled={busy}>
                     <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden />
                     Renew / relist
@@ -487,7 +487,7 @@ export function ListingDetailPage() {
               {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" aria-hidden />}
               {listing.status === "sold"
                 ? "Listing sold"
-                : listing.status === "given_away"
+                : listing.status === "donated"
                   ? "Given away"
                   : listing.status === "expired"
                     ? "Listing expired"
@@ -508,13 +508,13 @@ export function ListingDetailPage() {
                 className="flex-1"
                 onClick={() =>
                   setStatus(
-                    listing.transaction_type === "give_away" ? "given_away" : "sold",
-                    listing.transaction_type === "give_away" ? "given away" : "sold",
+                    listing.transaction_type === "donate" ? "donated" : "sold",
+                    listing.transaction_type === "donate" ? "donated" : "sold",
                   )
                 }
                 disabled={busy}
               >
-                Mark {listing.transaction_type === "give_away" ? "given away" : "sold"}
+                Mark {listing.transaction_type === "donate" ? "donated" : "sold"}
               </Button>
             ) : (
               <Button size="lg" className="flex-1" onClick={renew} disabled={busy}>
