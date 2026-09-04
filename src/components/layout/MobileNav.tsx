@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { Bell, Heart, Home, MessageSquare, PlusCircle, Search, User } from "lucide-react"
+import { Heart, Home, MessageSquare, PlusCircle, Search, User } from "lucide-react"
 import { useApp } from "@/app/AppContext"
 import { cn } from "@/lib/utils"
 

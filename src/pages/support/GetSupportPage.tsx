@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useApp } from "@/app/AppContext"
 import { ListingCard } from "@/components/shared/ListingCard"
-import { WantedPostCard } from "@/components/wanted/WantedPostCard"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { CardGridSkeleton } from "@/components/shared/Skeleton"
-import type { Listing, SupportRequest, WantedPost } from "@/lib/types"
+import type { Listing, SupportRequest } from "@/lib/types"
 
 export function GetSupportPage() {
   const { service, session } = useApp()

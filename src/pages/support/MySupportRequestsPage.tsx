@@ -22,8 +22,6 @@ export function MySupportRequestsPage() {
   const { service } = useApp()
   const [requests, setRequests] = useState<SupportRequest[]>([])
   const [loading, setLoading] = useState(true)
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -37,13 +35,9 @@ export function MySupportRequestsPage() {
     return () => { mounted = false }
   }, [service])
 
-  const handleDelete = async () => {
-    if (!deleteId) return
-    setDeleting(true)
-    await service.deleteSupportRequest(deleteId)
-    setRequests((prev) => prev.filter((r) => r.id !== deleteId))
-    setDeleteId(null)
-    setDeleting(false)
+  const handleDelete = async (id: string) => {
+    await service.deleteSupportRequest(id)
+    setRequests((prev) => prev.filter((r) => r.id !== id))
   }
 
   const handleMarkFulfilled = async (id: string) => {
@@ -111,30 +105,23 @@ export function MySupportRequestsPage() {
                       Fulfilled
                     </Button>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeleteId(r.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" aria-hidden />
-                  </Button>
+                  <ConfirmDialog
+                    title="Delete support request?"
+                    description="This action cannot be undone."
+                    confirmLabel="Delete"
+                    onConfirm={() => handleDelete(r.id)}
+                    trigger={
+                      <Button variant="ghost" size="sm">
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" aria-hidden />
+                      </Button>
+                    }
+                  />
                 </div>
               </div>
             )
           })}
         </div>
       )}
-
-      <ConfirmDialog
-        open={Boolean(deleteId)}
-        onOpenChange={(open) => { if (!open) setDeleteId(null) }}
-        title="Delete support request?"
-        description="This action cannot be undone."
-        confirmLabel="Delete"
-        onConfirm={handleDelete}
-        loading={deleting}
-        variant="destructive"
-      />
     </div>
   )
 }

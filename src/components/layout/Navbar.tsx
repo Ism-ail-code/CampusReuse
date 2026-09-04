@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom"
-import { Bell, ChevronDown, Heart, LogOut, MessageSquare, PlusCircle, Settings, User } from "lucide-react"
+import { Bell, ChevronDown, LogOut, MessageSquare, PlusCircle, Settings, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

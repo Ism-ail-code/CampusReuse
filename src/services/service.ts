@@ -14,7 +14,6 @@ import type {
   ReportTargetType,
   SupportRequest,
   SupportRequestFilters,
-  SupportRequestInput as SupportRequestInputType,
   UserProfile,
   WantedFilters,
   WantedPost,
