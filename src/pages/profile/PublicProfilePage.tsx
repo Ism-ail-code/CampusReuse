@@ -30,7 +30,11 @@ export function PublicProfilePage() {
     const p = await service.getProfileByUsername(username)
     setProfile(p)
     if (p) {
-      const all = await service.listListings({ only_active: true })
+      const [marketplace, support] = await Promise.all([
+        service.listListings({ only_active: true, listing_context: "marketplace" }),
+        service.listListings({ only_active: true, listing_context: "get_support" }),
+      ])
+      const all = [...marketplace, ...support]
       setListings(all.filter((l) => l.seller_id === p.id).slice(0, 12))
       setBlocked(await service.isBlocked(p.id))
     }

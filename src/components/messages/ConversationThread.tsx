@@ -157,7 +157,9 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
     ? conversation.listing.title
     : conversation.wanted
       ? `Wanted: ${conversation.wanted.title}`
-      : "General chat"
+      : conversation.wanted_id
+        ? "Support Request"
+        : "General chat"
   const listing = conversation.listing
 
   return (
