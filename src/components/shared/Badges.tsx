@@ -4,7 +4,7 @@ import { LISTING_STATUSES, WANTED_STATUSES, transactionLabel } from "@/lib/const
 import type { ListingStatus, ProposalStatus, TransactionType, WantedStatus } from "@/lib/types"
 
 export function StatusBadge({ status }: { status: ListingStatus | WantedStatus }) {
-  const source = (["available", "reserved", "sold", "given_away", "expired"] as ListingStatus[]).includes(
+  const source = (["available", "reserved", "sold", "donated", "expired"] as ListingStatus[]).includes(
     status as ListingStatus,
   )
     ? LISTING_STATUSES.find((s) => s.value === (status as ListingStatus))
@@ -19,7 +19,7 @@ export function StatusBadge({ status }: { status: ListingStatus | WantedStatus }
 const txStyles: Record<TransactionType, string> = {
   sell: "bg-primary/10 text-primary",
   exchange: "bg-indigo-500/10 text-indigo-600",
-  give_away: "bg-emerald-500/10 text-emerald-600",
+  donate: "bg-emerald-500/10 text-emerald-600",
 }
 
 export function TransactionBadge({ type, className }: { type: TransactionType; className?: string }) {
