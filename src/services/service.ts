@@ -4,7 +4,6 @@ import type {
   ExchangeProposal,
   Institution,
   Listing,
-  ListingContext,
   ListingFilters,
   Message,
   Notification,
@@ -55,7 +54,6 @@ export interface ListingInput {
   condition: Listing["condition"]
   description: string
   transactionType: Listing["transaction_type"]
-  listingContext: ListingContext
   price?: number | null
   exchangeWant?: string | null
 }

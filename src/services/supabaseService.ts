@@ -303,10 +303,6 @@ class SupabaseService implements DataService {
       .from("listings")
       .select("*, seller:profiles!listings_seller_id_fkey(*, institution:institutions(*)), images:listing_images(*), category:categories(*)")
 
-    // Filter by listing_context - default to 'marketplace' for backward compatibility
-    const context = filters.listing_context ?? "marketplace"
-    q = q.eq("listing_context", context)
-
     if (filters.query) {
       const term = `%${filters.query.trim()}%`
       q = q.or(`title.ilike.${term},subject.ilike.${term},description.ilike.${term}`)
@@ -322,7 +318,7 @@ class SupabaseService implements DataService {
 
     const statuses = filters.status ?? (filters.only_active ? [...LISTING_STATUSES_ACTIVE] : undefined)
     if (statuses && statuses.length) q = q.in("status", statuses as string[])
-    if (filters.exclude_sold) q = q.not("status", "in", `("sold","given_away")`)
+    if (filters.exclude_sold) q = q.not("status", "in", `("sold","donated")`)
 
     q = q.order("created_at", { ascending: false }).limit(100)
 
@@ -371,7 +367,6 @@ class SupabaseService implements DataService {
         condition: input.condition,
         description: input.description,
         transaction_type: input.transactionType,
-        listing_context: input.listingContext ?? "marketplace",
         price: input.transactionType === "sell" ? input.price : null,
         exchange_want: input.transactionType === "exchange" ? input.exchangeWant : null,
       })
@@ -403,9 +398,6 @@ class SupabaseService implements DataService {
       patch.transaction_type = input.transactionType
       patch.price = input.transactionType === "sell" ? input.price ?? null : null
       patch.exchange_want = input.transactionType === "exchange" ? input.exchangeWant ?? null : null
-    }
-    if (input.listingContext !== undefined) {
-      patch.listing_context = input.listingContext
     }
     const { error } = await supabase.from("listings").update(patch).eq("id", id)
     if (error) return { error: mapError(error, "Could not update listing.") }
