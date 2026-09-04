@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="border-t bg-card">
       <div className="mx-auto max-w-6xl px-4 pb-[calc(3.75rem+env(safe-area-inset-bottom))] pt-10 sm:px-6 sm:pb-10">
-        <div className="grid gap-8 sm:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Logo />
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
@@ -20,6 +20,14 @@ export function Footer() {
               <li><Link to="/wanted" className="hover:text-foreground">Wanted</Link></li>
               <li><Link to="/listings/new" className="hover:text-foreground">List an item</Link></li>
               <li><Link to="/exchanges" className="hover:text-foreground">Exchanges</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold">Get Support</h3>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/support" className="hover:text-foreground">Browse resources</Link></li>
+              <li><Link to="/support/new-request" className="hover:text-foreground">Post a request</Link></li>
+              <li><Link to="/listings/new?context=get_support" className="hover:text-foreground">Donate an item</Link></li>
             </ul>
           </div>
           <div>
