@@ -17,6 +17,10 @@ import { WantedBrowsePage } from "@/pages/wanted/WantedBrowsePage"
 import { CreateWantedPage } from "@/pages/wanted/CreateWantedPage"
 import { WantedDetailPage } from "@/pages/wanted/WantedDetailPage"
 import { MyWantedPage } from "@/pages/wanted/MyWantedPage"
+import { GetSupportPage } from "@/pages/support/GetSupportPage"
+import { SupportRequestDetailPage } from "@/pages/support/SupportRequestDetailPage"
+import { CreateSupportRequestPage } from "@/pages/support/CreateSupportRequestPage"
+import { MySupportRequestsPage } from "@/pages/support/MySupportRequestsPage"
 import { MessagesPage } from "@/pages/messages/MessagesPage"
 import { ConversationPage } from "@/pages/messages/ConversationPage"
 import { ExchangesPage } from "@/pages/exchange/ExchangesPage"
@@ -99,6 +103,24 @@ export function App() {
                 element={
                   <AuthGuard>
                     <MyWantedPage />
+                  </AuthGuard>
+                }
+              />
+              <Route path="/support" element={<GetSupportPage />} />
+              <Route path="/support/requests/:id" element={<SupportRequestDetailPage />} />
+              <Route
+                path="/support/new-request"
+                element={
+                  <AuthGuard>
+                    <CreateSupportRequestPage />
+                  </AuthGuard>
+                }
+              />
+              <Route
+                path="/my-support-requests"
+                element={
+                  <AuthGuard>
+                    <MySupportRequestsPage />
                   </AuthGuard>
                 }
               />
