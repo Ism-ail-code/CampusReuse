@@ -8,6 +8,8 @@ export type WantedStatus = "active" | "fulfilled" | "expired"
 export type ProposalStatus = "pending" | "accepted" | "declined" | "cancelled" | "completed"
 export type ReportStatus = "open" | "reviewed" | "dismissed" | "action_taken"
 export type ReportTargetType = "listing" | "user" | "message" | "wanted"
+export type ListingContext = "marketplace" | "get_support"
+export type SupportRequestStatus = "active" | "fulfilled" | "expired" | "cancelled"
 
 export interface Institution {
   id: string
@@ -66,6 +68,7 @@ export interface Listing {
   condition: ConditionType
   description: string
   transaction_type: TransactionType
+  listing_context: ListingContext
   price: number | null
   exchange_want: string | null
   status: ListingStatus
@@ -170,6 +173,7 @@ export interface ListingFilters {
   education_level?: string | null
   subject?: string | null
   transaction_type?: TransactionType | null
+  listing_context?: ListingContext | null
   condition?: ConditionType | null
   min_price?: number | null
   max_price?: number | null
@@ -183,6 +187,35 @@ export interface WantedFilters {
   query?: string
   category_id?: number | null
   status?: WantedStatus[]
+  sort?: "newest"
+}
+
+export interface SupportRequest {
+  id: string
+  user_id: string
+  title: string
+  description: string
+  category_id: number | null
+  subject: string | null
+  education_level: string | null
+  institution_id: string | null
+  location: string | null
+  condition_pref: ConditionType | null
+  image_url: string | null
+  status: SupportRequestStatus
+  created_at: string
+  updated_at: string
+  expires_at: string
+  author?: UserProfile | null
+  category?: Category | null
+  institution?: Institution | null
+}
+
+export interface SupportRequestFilters {
+  query?: string
+  category_id?: number | null
+  institution_id?: string | null
+  status?: SupportRequestStatus[]
   sort?: "newest"
 }
 
