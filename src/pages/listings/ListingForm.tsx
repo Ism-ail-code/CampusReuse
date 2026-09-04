@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { ChevronLeft, ChevronRight, ImagePlus, Loader2, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, ImagePlus, Loader2, X, Heart, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select"
 import { CATEGORIES, CONDITIONS, EDUCATION_LEVELS, SUBJECTS, TRANSACTION_TYPES } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import type { TransactionType } from "@/lib/types"
+import type { ListingContext, TransactionType } from "@/lib/types"
 
 export interface ListingFormValues {
   title: string
@@ -23,6 +23,7 @@ export interface ListingFormValues {
   customLevel: string
   condition: string
   description: string
+  listingContext: ListingContext
   transactionType: TransactionType
   price: string
   exchangeWant: string
@@ -51,6 +52,7 @@ export function ListingForm({
     customLevel: initial?.customLevel ?? "",
     condition: initial?.condition ?? "good",
     description: initial?.description ?? "",
+    listingContext: initial?.listingContext ?? "marketplace",
     transactionType: initial?.transactionType ?? "sell",
     price: initial?.price ?? "",
     exchangeWant: initial?.exchangeWant ?? "",
@@ -299,29 +301,87 @@ export function ListingForm({
         />
       </div>
 
-      {/* Transaction type */}
+      {/* Listing Context */}
       <div className="space-y-2">
-        <Label>How would you like to pass this on?</Label>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {TRANSACTION_TYPES.map((t) => {
-            const active = values.transactionType === t.value
-            return (
-              <button
-                key={t.value}
-                type="button"
-                onClick={() => set("transactionType", t.value)}
-                className={cn(
-                  "rounded-xl border p-4 text-left transition-colors",
-                  active ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:border-ring",
-                )}
-              >
-                <span className={cn("text-sm font-semibold", active ? "text-primary" : "text-foreground")}>{t.label}</span>
-                <span className="mt-1 block text-xs text-muted-foreground">{t.description}</span>
-              </button>
-            )
-          })}
+        <Label>What would you like to do?</Label>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => {
+              set("listingContext", "marketplace")
+              // Keep current transaction type if it's not give_away, otherwise switch to sell
+              if (values.transactionType === "give_away") {
+                set("transactionType", "sell")
+              }
+            }}
+            className={cn(
+              "rounded-xl border p-4 text-left transition-colors",
+              values.listingContext === "marketplace"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : "hover:border-ring",
+            )}
+          >
+            <span className={cn("flex items-center gap-2 text-sm font-semibold", values.listingContext === "marketplace" ? "text-primary" : "text-foreground")}>
+              <ShoppingCart className="h-4 w-4" aria-hidden />
+              Marketplace
+            </span>
+            <span className="mt-1 block text-xs text-muted-foreground">Buy, sell, or exchange items</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              set("listingContext", "get_support")
+              set("transactionType", "give_away")
+            }}
+            className={cn(
+              "rounded-xl border p-4 text-left transition-colors",
+              values.listingContext === "get_support"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : "hover:border-ring",
+            )}
+          >
+            <span className={cn("flex items-center gap-2 text-sm font-semibold", values.listingContext === "get_support" ? "text-primary" : "text-foreground")}>
+              <Heart className="h-4 w-4" aria-hidden />
+              Donate
+            </span>
+            <span className="mt-1 block text-xs text-muted-foreground">Give educational resources to students in need</span>
+          </button>
         </div>
       </div>
+
+      {/* Transaction type - only for marketplace context */}
+      {values.listingContext === "marketplace" && (
+        <div className="space-y-2">
+          <Label>How would you like to pass this on?</Label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {TRANSACTION_TYPES.map((t) => {
+              const active = values.transactionType === t.value
+              return (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => set("transactionType", t.value)}
+                  className={cn(
+                    "rounded-xl border p-4 text-left transition-colors",
+                    active ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:border-ring",
+                  )}
+                >
+                  <span className={cn("text-sm font-semibold", active ? "text-primary" : "text-foreground")}>{t.label}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">{t.description}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Donation info - for get_support context */}
+      {values.listingContext === "get_support" && (
+        <div className="rounded-lg border bg-emerald-50 p-4 text-sm text-emerald-700">
+          <p className="font-medium">Donation Listing</p>
+          <p className="mt-1">This item will be listed as a free resource in the Get Support section. Students who need it can contact you directly.</p>
+        </div>
+      )}
 
       {values.transactionType === "sell" && (
         <div className="space-y-2">
