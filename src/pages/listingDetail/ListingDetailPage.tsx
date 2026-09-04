@@ -301,6 +301,12 @@ export function ListingDetailPage() {
           <div className="flex flex-wrap items-center gap-2">
             <TransactionBadge type={listing.transaction_type} />
             <StatusBadge status={listing.status} />
+            {listing.listing_context === "get_support" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
+                <Gift className="h-3 w-3" aria-hidden />
+                Get Support
+              </span>
+            )}
             <span className="text-xs text-muted-foreground">Listed {formatDate(listing.created_at)}</span>
           </div>
 
@@ -313,7 +319,7 @@ export function ListingDetailPage() {
             {listing.transaction_type === "give_away" && (
               <p className="flex items-center gap-2 text-xl font-semibold text-emerald-600">
                 <Gift className="h-5 w-5" aria-hidden />
-                Free — give away
+                {listing.listing_context === "get_support" ? "Free — Donation" : "Free — give away"}
               </p>
             )}
             {listing.transaction_type === "exchange" && (
