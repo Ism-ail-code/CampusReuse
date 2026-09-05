@@ -35,7 +35,7 @@ export function SearchBar({
           aria-label="Search listings"
         />
       </div>
-      <Button type="submit" className="h-11 px-5">
+      <Button type="submit" className="hidden h-11 px-5 sm:inline-flex">
         Search
       </Button>
     </form>
