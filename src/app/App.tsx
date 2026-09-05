@@ -17,6 +17,7 @@ import { WantedBrowsePage } from "@/pages/wanted/WantedBrowsePage"
 import { CreateWantedPage } from "@/pages/wanted/CreateWantedPage"
 import { WantedDetailPage } from "@/pages/wanted/WantedDetailPage"
 import { MyWantedPage } from "@/pages/wanted/MyWantedPage"
+import { DonatePage } from "@/pages/donate/DonatePage"
 import { GetSupportPage } from "@/pages/support/GetSupportPage"
 import { SupportRequestDetailPage } from "@/pages/support/SupportRequestDetailPage"
 import { CreateSupportRequestPage } from "@/pages/support/CreateSupportRequestPage"
@@ -124,6 +125,7 @@ export function App() {
                   </AuthGuard>
                 }
               />
+              <Route path="/donate" element={<DonatePage />} />
               <Route
                 path="/messages"
                 element={
