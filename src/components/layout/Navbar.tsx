@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom"
-import { Bell, ChevronDown, LogOut, MessageSquare, PlusCircle, Settings, User } from "lucide-react"
+import { Bell, ChevronDown, Heart, LogOut, MessageSquare, PlusCircle, Settings, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -50,6 +50,10 @@ export function Navbar() {
             <NavLinkItem to="/wanted">Wanted</NavLinkItem>
             <NavLinkItem to="/exchanges">Exchange</NavLinkItem>
             <NavLinkItem to="/support">Get Support</NavLinkItem>
+            <NavLinkItem to="/donate">
+              <Heart className="mr-1 inline h-3.5 w-3.5 text-rose-500" aria-hidden />
+              Donate
+            </NavLinkItem>
           </nav>
         </div>
 
