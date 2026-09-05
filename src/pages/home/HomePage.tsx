@@ -3,9 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import {
   ArrowRight,
   BookOpen,
-  Gift,
   Handshake,
-  Heart,
   HeartHandshake,
   MessagesSquare,
   Search,
@@ -51,19 +49,18 @@ export function HomePage() {
     <div>
       {/* Hero */}
       <section className="border-b bg-gradient-to-b from-primary/[0.04] to-transparent">
-        <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 py-10 text-center sm:px-6 sm:py-16">
           <p className="mx-auto flex w-fit items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             Built for students. Shared by students.
           </p>
-          <h1 className="mx-auto mt-5 max-w-2xl text-balance text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mx-auto mt-4 max-w-2xl text-balance text-2xl font-bold tracking-tight text-foreground sm:mt-5 sm:text-5xl">
             Academic materials shouldn't have to cost a fortune.
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-pretty text-base text-muted-foreground sm:text-lg">
-            Buy what you need. Sell what you no longer use. Exchange what you have. Give what you can —
-            all within your student community.
+          <p className="mx-auto mt-3 max-w-xl text-pretty text-sm text-muted-foreground sm:mt-4 sm:text-lg">
+            Buy what you need. Sell what you no longer use. Exchange what you have. Support your student community.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-8 sm:flex-row">
             <Button asChild size="lg" className="w-full sm:w-auto">
               <Link to="/browse">
                 Browse materials
@@ -75,14 +72,14 @@ export function HomePage() {
             </Button>
           </div>
 
-          <div className="mx-auto mt-10 max-w-2xl">
+          <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
             <SearchBar placeholder="Search books, notes, guides, calculators…" />
           </div>
         </div>
       </section>
 
       {/* Categories */}
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground">Browse by category</h2>
           <Link to="/browse" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
@@ -106,7 +103,7 @@ export function HomePage() {
       </section>
 
       {/* Nearby listings */}
-      <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-foreground">
@@ -143,7 +140,7 @@ export function HomePage() {
       </section>
 
       {/* Wanted */}
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="rounded-2xl border bg-card p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -169,60 +166,9 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Get Support */}
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="flex items-center gap-2 text-xl font-bold text-foreground">
-                <Heart className="h-5 w-5 text-rose-500" aria-hidden />
-                Get Support
-              </h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Free educational resources shared by the community. Request what you need.
-              </p>
-            </div>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/support">Browse resources</Link>
-            </Button>
-          </div>
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Link
-              to="/support"
-              className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-shadow hover:shadow-card"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                <Gift className="h-5 w-5" aria-hidden />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Available Resources</p>
-                <p className="text-xs text-muted-foreground">Free books, notes, and educational materials</p>
-              </div>
-            </Link>
-            <Link
-              to="/support"
-              className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-shadow hover:shadow-card"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <Search className="h-5 w-5" aria-hidden />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Student Requests</p>
-                <p className="text-xs text-muted-foreground">Find items students need help with</p>
-              </div>
-            </Link>
-          </div>
-          <div className="mt-5 text-center">
-            <Link to="/support" className="text-sm font-medium text-primary hover:underline">
-              Explore Get Support →
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* How it works */}
       <section className="border-y bg-muted/40">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
           <h2 className="text-center text-2xl font-bold text-foreground">How it works</h2>
           <p className="mx-auto mt-2 max-w-lg text-center text-sm text-muted-foreground">
             We connect you. You arrange the exchange — in person, on your own terms. No payments, no delivery, no fees.
@@ -246,7 +192,7 @@ export function HomePage() {
       </section>
 
       {/* Mission + trust */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="grid gap-8 sm:grid-cols-2">
           <div>
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
