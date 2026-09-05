@@ -9,7 +9,7 @@ export function MobileNav() {
   const items = [
     { to: "/", label: "Home", icon: Home, end: true },
     { to: "/browse", label: "Browse", icon: Search, end: false },
-    { to: "/support", label: "Support", icon: Heart, end: false },
+    { to: "/donate", label: "Donate", icon: Heart, end: false },
     ...(session?.user.id ? [{ to: "/listings/new", label: "Sell", icon: PlusCircle, end: false }] : []),
     { to: "/messages", label: "Messages", icon: MessageSquare, badge: unreadMessages, end: false },
     {
